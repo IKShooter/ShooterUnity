@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Events;
 using Network.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LobbyUI : MonoBehaviour
@@ -31,16 +32,22 @@ public class LobbyUI : MonoBehaviour
 
                 RoomsListItem newListItem = newItem.GetComponent<RoomsListItem>();
                 newListItem.GetTitleText().text = room.Name;
-                newListItem.GetInfoeText().text = $"{room.PlayerCount} / {room.PlayerMax} in {room.SceneName} by {room.GameMod}";
+                newListItem.GetInfoeText().text = $"{room.PlayerCount} / {room.PlayerMax}";
 
                 newItem.GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
-                    //NetworkManager.Instance.TryJoinRoom(room.ID);
+                    NetworkManager.Instance.TryJoinRoom(room.Name);
                 });
             
                 newItem.SetActive(true);
                 newItem.transform.SetParent(roomsItemsContainer.transform);
+                newItem.transform.localScale = Vector3.one;
             }
+        });
+        
+        EventsManager<RoomJoinedEvent>.Register(room =>
+        {
+            SceneManager.LoadScene("Scenes/InGame");
         });
 
         RefreshRooms();

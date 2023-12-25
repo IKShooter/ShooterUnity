@@ -1,22 +1,20 @@
 ﻿using LiteNetLib.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Network.Models;
 
 namespace Server.Models
 {
-    public class RequestJoinRoom : INetSerializable
+    public class JoinedRoomModel : INetSerializable
     {
+        public RoomModel Room;
         public void Deserialize(NetDataReader reader)
         {
-
+            Room = new RoomModel();
+            Room.Deserialize(reader);
         }
 
         public void Serialize(NetDataWriter writer)
         {
-
+            writer.Put(Room);
         }
     }
 }

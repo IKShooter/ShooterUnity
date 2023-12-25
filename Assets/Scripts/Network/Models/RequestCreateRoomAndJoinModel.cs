@@ -2,7 +2,7 @@
 
 namespace Network.Models
 {
-    public class RequestCreateRoomModel : INetSerializable
+    public class RequestCreateRoomAndJoinModel : INetSerializable
     {
         public string NameRoom;
         public string SceneName;

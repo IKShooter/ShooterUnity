@@ -11,14 +11,17 @@ namespace GameUI
     {
         [SerializeField] private Text nicknameText;
         [SerializeField] private Button authButton;
+        [SerializeField] private Button anonAuthButton;
         
         private void Start()
         {
             authButton.interactable = false;
+            anonAuthButton.interactable = false;
             
             EventsManager<ServerConnectedEvent>.Register(peer =>
             {
                 authButton.interactable = true;
+                anonAuthButton.interactable = true;
             });
             
             EventsManager<SuccessAuthEvent>.Register(() =>

@@ -18,6 +18,8 @@ public class NetworkManager : MonoBehaviour
     public NetPacketProcessor _netPacketProcessor;
     private NetDataWriter _writer;
     private NetPeer _serverPeer;
+
+    private RoomModel currentRoom;
     
     private const string Key = "Shooter";
     private const string Addr = "10.0.0.5";
@@ -35,18 +37,23 @@ public class NetworkManager : MonoBehaviour
         _netManager = new NetManager(new NetworkEventsController(this));
         _netPacketProcessor = new NetPacketProcessor();
         _writer = new NetDataWriter();
+
+        NetPacketProcessor netPP = _netPacketProcessor;
         
         //request model
-        _netPacketProcessor.RegisterNestedType(() => new RequestPlayerAuthModel());
-        _netPacketProcessor.RegisterNestedType(() => new RequestCreateRoomModel());
-        _netPacketProcessor.RegisterNestedType(() => new RequestRoomsListModel());
-        
+        netPP.RegisterNestedType(() => new RequestPlayerAuthModel());
+        netPP.RegisterNestedType(() => new RequestRoomsListModel());
+        netPP.RegisterNestedType(() => new RequestCreateRoomAndJoinModel());
+        netPP.RegisterNestedType(() => new RequestRoomAccessModel());
+        netPP.RegisterNestedType(() => new RequestJoinRoomModel());
+        netPP.RegisterNestedType(() => new RequestSendRoomMessageModel());
         //model
-        _netPacketProcessor.RegisterNestedType(() => new RoomModel());
-        _netPacketProcessor.RegisterNestedType(() => new PlayerModel());
-        _netPacketProcessor.RegisterNestedType(() => new ErrorResultModel());
-        _netPacketProcessor.RegisterNestedType(() => new RoomsListModel());
-        _netPacketProcessor.RegisterNestedType(() => new SuccessAuthModel());
+        netPP.RegisterNestedType(() => new RoomModel());
+        netPP.RegisterNestedType(() => new PlayerModel());
+        netPP.RegisterNestedType(() => new ErrorResultModel());
+        netPP.RegisterNestedType(() => new RoomsListModel());
+        netPP.RegisterNestedType(() => new SuccessAuthModel());
+        netPP.RegisterNestedType(() => new JoinedRoomModel());
 
         _netPacketProcessor.SubscribeNetSerializable((SuccessAuthModel model, NetPeer peer) =>
         {
@@ -56,6 +63,17 @@ public class NetworkManager : MonoBehaviour
         _netPacketProcessor.SubscribeNetSerializable((RoomsListModel model, NetPeer peer) =>
         {
             EventsManager<RoomsLoadedEvent>.Trigger?.Invoke(model.roomListModel);
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((JoinedRoomModel model, NetPeer peer) =>
+        {
+            currentRoom = model.Room;
+            EventsManager<RoomJoinedEvent>.Trigger?.Invoke(model.Room);
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((MessageModel model, NetPeer peer) =>
+        {
+            EventsManager<MessageReceivedEvent>.Trigger?.Invoke(model);
         });
         
         EventsManager<ServerConnectedEvent>.Register((peer) =>
@@ -112,6 +130,59 @@ public class NetworkManager : MonoBehaviour
     {
         _writer.Reset();
         RequestRoomsListModel model = new RequestRoomsListModel();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void TryCreateRoom(string name, int maxPlayers, string sceneName, string gameMode)
+    {
+        _writer.Reset();
+        RequestCreateRoomAndJoinModel model = new RequestCreateRoomAndJoinModel()
+        {
+            NameRoom = name,
+            GameMode = 0, // TODO
+            MaxPlayers = (byte)maxPlayers,
+            SceneName = sceneName
+        };
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void TryJoinRoom(string roomName)
+    {
+        _writer.Reset();
+        RequestJoinRoomModel model = new RequestJoinRoomModel()
+        {
+            NameRoom = roomName,
+        };
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void LeaveRoom()
+    {
+        currentRoom = null;
+        EventsManager<RoomLeaveEvent>.Trigger?.Invoke();
+        
+        // TODO: Send leave request
+    }
+
+    public void RequestAccessInRoom()
+    {
+        _writer.Reset();
+        RequestRoomAccessModel model = new RequestRoomAccessModel();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void TrySendMessage(string text, TypeMessage type)
+    {
+        _writer.Reset();
+        RequestSendRoomMessageModel model = new RequestSendRoomMessageModel()
+        {
+            Text = text,
+            Type = type
+        };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
     }
