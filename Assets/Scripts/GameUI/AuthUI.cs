@@ -1,6 +1,7 @@
 ﻿using System;
 using Events;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace GameUI
@@ -17,6 +18,11 @@ namespace GameUI
             EventsManager<ServerConnectedEvent>.Register(peer =>
             {
                 authButton.interactable = true;
+            });
+            
+            EventsManager<SuccessAuthEvent>.Register(() =>
+            {
+                SceneManager.LoadScene("Scenes/MainMenu");
             });
         }
 

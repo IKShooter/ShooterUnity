@@ -36,8 +36,11 @@ public class NetworkManager : MonoBehaviour
         _writer = new NetDataWriter();
         
         _netPacketProcessor.RegisterNestedType<RequestPlayerAuthModel>(() => new RequestPlayerAuthModel());
-        
-        // SubscribeNetSerializable
+
+        _netPacketProcessor.SubscribeNetSerializable((SuccessAuthModel model, NetPeer peer) =>
+        {
+            EventsManager<SuccessAuthEvent>.Trigger?.Invoke();
+        });
         
         EventsManager<ServerConnectedEvent>.Register((peer) =>
         {
