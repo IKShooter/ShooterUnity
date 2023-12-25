@@ -6,6 +6,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using Network;
 using Network.Models;
+using Server.Models;
 using UnityEngine;
 
 public class NetworkManager : MonoBehaviour
@@ -35,11 +36,26 @@ public class NetworkManager : MonoBehaviour
         _netPacketProcessor = new NetPacketProcessor();
         _writer = new NetDataWriter();
         
-        _netPacketProcessor.RegisterNestedType<RequestPlayerAuthModel>(() => new RequestPlayerAuthModel());
+        //request model
+        _netPacketProcessor.RegisterNestedType(() => new RequestPlayerAuthModel());
+        _netPacketProcessor.RegisterNestedType(() => new RequestCreateRoomModel());
+        _netPacketProcessor.RegisterNestedType(() => new RequestRoomsListModel());
+        
+        //model
+        _netPacketProcessor.RegisterNestedType(() => new RoomModel());
+        _netPacketProcessor.RegisterNestedType(() => new PlayerModel());
+        _netPacketProcessor.RegisterNestedType(() => new ErrorResultModel());
+        _netPacketProcessor.RegisterNestedType(() => new RoomsListModel());
+        _netPacketProcessor.RegisterNestedType(() => new SuccessAuthModel());
 
         _netPacketProcessor.SubscribeNetSerializable((SuccessAuthModel model, NetPeer peer) =>
         {
             EventsManager<SuccessAuthEvent>.Trigger?.Invoke();
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((RoomsListModel model, NetPeer peer) =>
+        {
+            EventsManager<RoomsLoadedEvent>.Trigger?.Invoke(model.roomListModel);
         });
         
         EventsManager<ServerConnectedEvent>.Register((peer) =>
@@ -84,11 +100,19 @@ public class NetworkManager : MonoBehaviour
     public void TryAuth(string nickName)
     {
         _writer.Reset();
-        RequestPlayerAuthModel requestPlayerAuthModel = new RequestPlayerAuthModel
+        RequestPlayerAuthModel model = new RequestPlayerAuthModel
         {
             Nickname = nickName
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref requestPlayerAuthModel);
-        _serverPeer.Send(_writer, DeliveryMethod.Unreliable);
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void LoadRoomsList()
+    {
+        _writer.Reset();
+        RequestRoomsListModel model = new RequestRoomsListModel();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
     }
 }
