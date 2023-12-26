@@ -20,10 +20,6 @@ public class NetworkManager : MonoBehaviour
     private NetPeer _serverPeer;
 
     private RoomModel currentRoom;
-    
-    private const string Key = "Shooter";
-    private const string Addr = "10.0.0.5";
-    private const int Port = 7332;
 
     public NetworkManager()
     {
@@ -47,6 +43,7 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new RequestRoomAccessModel());
         netPP.RegisterNestedType(() => new RequestJoinRoomModel());
         netPP.RegisterNestedType(() => new RequestSendRoomMessageModel());
+        netPP.RegisterNestedType(() => new RequestLeaveRoomModel());
         //model
         netPP.RegisterNestedType(() => new RoomModel());
         netPP.RegisterNestedType(() => new PlayerModel());
@@ -55,6 +52,11 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new SuccessAuthModel());
         netPP.RegisterNestedType(() => new JoinedRoomModel());
 
+        _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
+        {
+            EventsManager<ErrorEvent>.Trigger?.Invoke(new Exception($"Error code #{model.ErrorType.ToString()}"), model.IsCritical);
+        });
+        
         _netPacketProcessor.SubscribeNetSerializable((SuccessAuthModel model, NetPeer peer) =>
         {
             EventsManager<SuccessAuthEvent>.Trigger?.Invoke();
@@ -107,7 +109,7 @@ public class NetworkManager : MonoBehaviour
     public void TryConnect()
     {
         _netManager.Start();
-        _netManager.Connect(Addr, Port, Key);
+        _netManager.Connect(GameConstants.ServerAddr, GameConstants.ServerPort, GameConstants.ServerKey);
     }
 
     public void TryDisconnected()
@@ -120,7 +122,8 @@ public class NetworkManager : MonoBehaviour
         _writer.Reset();
         RequestPlayerAuthModel model = new RequestPlayerAuthModel
         {
-            Nickname = nickName
+            Nickname = nickName,
+            VersionCode = GameConstants.VersionCode
         };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
@@ -164,7 +167,10 @@ public class NetworkManager : MonoBehaviour
         currentRoom = null;
         EventsManager<RoomLeaveEvent>.Trigger?.Invoke();
         
-        // TODO: Send leave request
+        _writer.Reset();
+        RequestLeaveRoomModel model = new RequestLeaveRoomModel();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
     }
 
     public void RequestAccessInRoom()

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Events;
 using Network;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
@@ -31,5 +32,11 @@ public class InGameUI : MonoBehaviour
         TypeMessage type = (TypeMessage)typeId;
         NetworkManager.Instance.TrySendMessage(chatField.text, type);
         chatField.text = "";
+    }
+
+    public void LeaveFromRoom()
+    {
+        NetworkManager.Instance.LeaveRoom();
+        SceneManager.LoadScene("Scenes/MainMenu");
     }
 }
