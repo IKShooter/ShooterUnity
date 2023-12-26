@@ -10,6 +10,8 @@ namespace Network.Models.Player
 
         public void Deserialize(NetDataReader reader)
         {
+            Players = new List<PlayerModel>();
+            
             var count = reader.GetInt();
             for (int i = 0; i < count; i++)
             {
@@ -21,7 +23,6 @@ namespace Network.Models.Player
 
         public void Serialize(NetDataWriter writer)
         {
-            Players = new List<PlayerModel>();
             writer.Put(Players.Count);
             foreach (var player in Players)
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using Events;
@@ -20,6 +21,7 @@ public class NetworkManager : MonoBehaviour
     private NetDataWriter _writer;
     private NetPeer _serverPeer;
 
+    private PlayerModel currentPlayer;
     private RoomModel currentRoom;
 
     public NetworkManager()
@@ -69,12 +71,37 @@ public class NetworkManager : MonoBehaviour
         
         _netPacketProcessor.SubscribeNetSerializable((RoomsListModel model, NetPeer peer) =>
         {
-            EventsManager<RoomsLoadedEvent>.Trigger?.Invoke(model.roomListModel);
+            // BUG!?: Dublicates of rooms
+            // FIXME: Stupid fuck
+
+            List<RoomModel> filteredRooms = new List<RoomModel>();
+            foreach (var roomModel in model.roomListModel)
+            {
+                bool isBugDublicate = false;
+                foreach (var filteredRoom in filteredRooms)
+                {
+                    if (filteredRoom.Name == roomModel.Name)
+                    {
+                        Debug.Log($"SKIPPED BUG DUBLICATE {roomModel.Name}");
+                        isBugDublicate = true;
+                        break;
+                    }
+                }
+                
+                // Skip dublicate
+                if(isBugDublicate)
+                    continue;
+
+                filteredRooms.Add(roomModel);
+            }
+
+            EventsManager<RoomsLoadedEvent>.Trigger?.Invoke(filteredRooms);
         });
         
         _netPacketProcessor.SubscribeNetSerializable((JoinedRoomModel model, NetPeer peer) =>
         {
             currentRoom = model.Room;
+            currentPlayer = model.PlayerModel;
             EventsManager<RoomJoinedEvent>.Trigger?.Invoke(model.Room);
         });
         
@@ -119,6 +146,16 @@ public class NetworkManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         TryDisconnected();
+    }
+
+    public PlayerModel GetCurrentPlayer()
+    {
+        return currentPlayer;
+    }
+
+    public RoomModel GetCurrentRoom()
+    {
+        return currentRoom;
     }
 
     public void TryConnect()
@@ -217,6 +254,6 @@ public class NetworkManager : MonoBehaviour
             RotationY = verticalRotation
         };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        _serverPeer.Send(_writer, DeliveryMethod.Unreliable);
     }
 }
