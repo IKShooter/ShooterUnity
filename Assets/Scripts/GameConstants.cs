@@ -4,5 +4,5 @@
     public const ushort ServerPort = 7332;
     public const string ServerKey = "Shooter";
     public const string VersionName = "test";
-    public const ushort VersionCode = 44;
+    public const ushort VersionCode = 0;
 }

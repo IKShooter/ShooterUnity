@@ -6,6 +6,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using Network;
 using Network.Models;
+using Network.Models.Player;
 using Server.Models;
 using UnityEngine;
 
@@ -44,6 +45,8 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new RequestJoinRoomModel());
         netPP.RegisterNestedType(() => new RequestSendRoomMessageModel());
         netPP.RegisterNestedType(() => new RequestLeaveRoomModel());
+        netPP.RegisterNestedType(() => new RequestUpdatePlayerInRoom());
+        
         //model
         netPP.RegisterNestedType(() => new RoomModel());
         netPP.RegisterNestedType(() => new PlayerModel());
@@ -51,6 +54,8 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new RoomsListModel());
         netPP.RegisterNestedType(() => new SuccessAuthModel());
         netPP.RegisterNestedType(() => new JoinedRoomModel());
+        netPP.RegisterNestedType(() => new PlayersInRoom());
+        netPP.RegisterNestedType(() => new UpdatePlayerInRoom());
 
         _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
         {
@@ -76,6 +81,16 @@ public class NetworkManager : MonoBehaviour
         _netPacketProcessor.SubscribeNetSerializable((MessageModel model, NetPeer peer) =>
         {
             EventsManager<MessageReceivedEvent>.Trigger?.Invoke(model);
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((PlayersInRoom model, NetPeer peer) =>
+        {
+            EventsManager<PlayersInRoomEvent>.Trigger?.Invoke(model.Players);
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((UpdatePlayerInRoom model, NetPeer peer) =>
+        {
+            EventsManager<UpdatePlayerInRoomEvent>.Trigger?.Invoke(model);
         });
         
         EventsManager<ServerConnectedEvent>.Register((peer) =>
@@ -188,6 +203,18 @@ public class NetworkManager : MonoBehaviour
         {
             Text = text,
             Type = type
+        };
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void UpdatePlayer(Vector3 transformPosition, float verticalRotation)
+    {
+        _writer.Reset();
+        RequestUpdatePlayerInRoom model = new RequestUpdatePlayerInRoom()
+        {
+            Position = transformPosition,
+            RotationY = verticalRotation
         };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);

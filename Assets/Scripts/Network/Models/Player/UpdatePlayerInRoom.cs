@@ -1,19 +1,16 @@
 ﻿using LiteNetLib.Utils;
 using UnityEngine;
 
-namespace Network.Models
+namespace Network.Models.Player
 {
-    public class PlayerModel : INetSerializable
+    public class UpdatePlayerInRoom : INetSerializable
     {
-        public string Nickname;
         public int Id;
-
         public Vector3 Position;
         public float RotationY;
 
         public void Deserialize(NetDataReader reader)
         {
-            Nickname = reader.GetString();
             Id = reader.GetInt();
 
             Position = new Vector3();
@@ -25,7 +22,6 @@ namespace Network.Models
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(Nickname);
             writer.Put(Id);
 
             writer.Put(Position.x);
