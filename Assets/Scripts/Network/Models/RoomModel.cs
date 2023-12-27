@@ -10,7 +10,7 @@ namespace Network.Models
         public int PlayerCount;
         public int PlayerMax;
 
-        public byte GameMod;
+        public GameMode GameMode;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -18,7 +18,7 @@ namespace Network.Models
             SceneName = reader.GetString();
             PlayerCount = reader.GetInt();
             PlayerMax = reader.GetInt();
-            GameMod = reader.GetByte();
+            GameMode = (GameMode)reader.GetByte();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -27,7 +27,7 @@ namespace Network.Models
             writer.Put(SceneName);
             writer.Put(PlayerCount);
             writer.Put(PlayerMax);
-            writer.Put(GameMod);
+            writer.Put((byte)GameMode);
         }
     }
 }

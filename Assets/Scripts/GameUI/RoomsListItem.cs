@@ -17,6 +17,6 @@ public class RoomsListItem : MonoBehaviour
         nameText.text = room.Name;
         plCountText.text = $"{room.PlayerCount} / {room.PlayerMax}";
         sceneText.text = room.SceneName;
-        gameModeText.text = room.GameMod.ToString();
+        // TODO: gameModeText.text = room.GameMod.ToString();
     }
 }

@@ -2,7 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Events;
+using GameUI;
 using Network;
+using Network.Models;
+using Network.Models.Player;
 using Server.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,26 +13,30 @@ using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
 {
-    [SerializeField] private Text chatPreviewText;
     [SerializeField] private Text chatText;
     [SerializeField] private InputField chatField;
     [SerializeField] private Text chatFieldText;
     [SerializeField] private Dropdown messageTarget;
 
     [SerializeField] private GameObject chatUI;
-    [SerializeField] private GameObject playersTableUI;
+    [SerializeField] private PlayersListInRoomUI playersTableUI;
 
     private bool _isLeaved;
     private bool _isChatOpen;
     private bool _isPlayersFieldOpen;
+
+    private float lastMessageTime = 0f;
+    
+    private List<MessageModel> allMessages = new List<MessageModel>();
     
     void Start()
     {
         EventsManager<MessageReceivedEvent>.Register(OnMessageReceived);
+        EventsManager<PlayersInRoomEvent>.Register(OnPlayersInRoomUpdated);
         NetworkManager.Instance.RequestAccessInRoom();
         
         // Hide by default
-        playersTableUI.SetActive(false);
+        playersTableUI.gameObject.SetActive(false);
         chatUI.SetActive(false);
     }
 
@@ -44,11 +51,13 @@ public class InGameUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             _isPlayersFieldOpen = true;
-            playersTableUI.SetActive(true);
+            playersTableUI.gameObject.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
         } else if (Input.GetKeyUp(KeyCode.Tab))
         {
             _isPlayersFieldOpen = false;
-            playersTableUI.SetActive(false);
+            playersTableUI.gameObject.SetActive(false);
+            Cursor.lockState = CursorLockMode.Locked;
         }
         
         // Chat show/hide toggle
@@ -56,31 +65,50 @@ public class InGameUI : MonoBehaviour
         {
             _isChatOpen = !_isChatOpen;
             chatUI.SetActive(_isChatOpen);
+
+            if (_isChatOpen)
+            {
+                ShowAllChatHistory();
+            }
+            else
+            {
+                chatText.text = "";
+            }
             
             Cursor.lockState = _isChatOpen ? CursorLockMode.None : CursorLockMode.Locked;
         }
+
+        if (lastMessageTime != 0f && Time.time - lastMessageTime > 2.5f)
+        {
+            chatText.text = "";
+        }
     }
 
+    private void OnPlayersInRoomUpdated(List<PlayerModel> players)
+    {
+        playersTableUI.UpdateList(players);
+    }
+    
     private void OnMessageReceived(MessageModel message)
     {
-        if(_isLeaved)
-            return;
+        if(_isLeaved) return;
+        
+        allMessages.Add(message);
+        
         string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
-        Debug.Log($"MESSAGE: {sender} : {message.Text}");   
-            
         chatText.text += $"{sender} : {message.Text}\n";
 
-        if(!_isChatOpen)
-            StartCoroutine(ShowPreviewChatMessage(message));
+        lastMessageTime = Time.time;
     }
 
-    private IEnumerator ShowPreviewChatMessage(MessageModel message)
+    public void ShowAllChatHistory()
     {
-        chatPreviewText.enabled = true;
-        string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
-        chatPreviewText.text = $"{sender} : {message.Text}";
-        yield return new WaitForSeconds(2.5f);
-        chatPreviewText.enabled = false;
+        chatText.text = "";
+        foreach (var msg in allMessages)
+        {
+            string sender = msg.Type == TypeMessage.System ? "SYSTEM" : msg.SenderNickname;
+            chatText.text += $"{sender} : {msg.Text}\n";
+        }
     }
     
     public void SendMessage()

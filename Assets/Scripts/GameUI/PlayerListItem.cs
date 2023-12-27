@@ -6,10 +6,12 @@ namespace GameUI
 {
     public class PlayerListItem : MonoBehaviour
     {
-        public void SetPlayerInfo(PlayerModel player)
+        public void SetInfo(PlayerModel player)
         {
             GetComponentsInChildren<Text>()[0].text = $"{player.Nickname} ({player.Id})";
-            // GetComponentsInChildren<Text>()[1].text = "";
+            GetComponentsInChildren<Text>()[0].text = "0";
+            GetComponentsInChildren<Text>()[0].text = "0";
+            GetComponentsInChildren<Text>()[0].text = "0";
         }
     }
 }

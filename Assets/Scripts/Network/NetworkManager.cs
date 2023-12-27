@@ -58,7 +58,8 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new JoinedRoomModel());
         netPP.RegisterNestedType(() => new PlayersInRoom());
         netPP.RegisterNestedType(() => new UpdatePlayerInRoom());
-
+        netPP.RegisterNestedType(() => new UpdatePlayersTickInRoom());
+        
         _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
         {
             EventsManager<ErrorEvent>.Trigger?.Invoke("Server error", new Exception($"{model.ErrorType.ToString()}"), model.IsCritical);
@@ -115,7 +116,7 @@ public class NetworkManager : MonoBehaviour
             EventsManager<PlayersInRoomEvent>.Trigger?.Invoke(model.Players);
         });
         
-        _netPacketProcessor.SubscribeNetSerializable((UpdatePlayerInRoom model, NetPeer peer) =>
+        _netPacketProcessor.SubscribeNetSerializable((UpdatePlayersTickInRoom model, NetPeer peer) =>
         {
             EventsManager<UpdatePlayerInRoomEvent>.Trigger?.Invoke(model);
         });

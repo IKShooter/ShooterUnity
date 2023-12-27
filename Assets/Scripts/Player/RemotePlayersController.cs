@@ -73,14 +73,17 @@ namespace Player
             
             EventsManager<UpdatePlayerInRoomEvent>.Register((model =>
             {
-                Debug.Log($"UpdatePlayerInRoomEvent for {model.Id}");
-                
-                RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == model.Id);
-
-                if (remotePlayer != null)
+                foreach (var updatePlayerInRoom in model.updates)
                 {
-                    remotePlayer._model.RotationY = model.RotationY;
-                    remotePlayer._model.Position = model.Position;
+                    Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id}");
+                
+                    RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == updatePlayerInRoom.Id);
+
+                    if (remotePlayer != null)
+                    {
+                        remotePlayer._model.RotationY = updatePlayerInRoom.RotationY;
+                        remotePlayer._model.Position = updatePlayerInRoom.Position;
+                    }
                 }
             }));
         }
@@ -98,10 +101,14 @@ namespace Player
                 // remotePlayer._gameObject.transform.position = remotePlayer._model.Position;
                 // remotePlayer._gameObject.transform.rotation = Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f);
                 
-                // // Rotate nick
+                // Rotate nick
                 GameObject nickNameTextGameObject = remotePlayer._gameObject.GetComponentInChildren<TextMesh>().gameObject;
-                if(nickNameTextGameObject)
-                    nickNameTextGameObject.transform.LookAt(PlayerController.Instance.GetCamera().transform);
+                if (nickNameTextGameObject)
+                {
+                    GameObject go = PlayerController.Instance.GetCamera().gameObject;
+                    Vector3 heading = go.transform.position - nickNameTextGameObject.transform.position;
+                    nickNameTextGameObject.transform.LookAt(nickNameTextGameObject.transform.position - heading);
+                }
             }
         }
     }

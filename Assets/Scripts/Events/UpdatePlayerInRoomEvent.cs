@@ -2,5 +2,5 @@
 
 namespace Events
 {
-    public delegate void UpdatePlayerInRoomEvent(UpdatePlayerInRoom updatePlayerInRoom);
+    public delegate void UpdatePlayerInRoomEvent(UpdatePlayersTickInRoom updatePlayersTickInRoom);
 }
