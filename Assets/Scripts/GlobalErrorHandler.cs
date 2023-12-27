@@ -30,7 +30,7 @@ public class GlobalErrorHandler : MonoBehaviour
         GameObject dialogAsset = Resources.Load<GameObject>("Prefabs/UI/ErrorDialog");
         GameObject uiGameObject = Instantiate(dialogAsset);
         
-        uiGameObject.GetComponentInChildren<RectTransform>().localPosition = Vector3.one;
+        uiGameObject.GetComponentInChildren<RectTransform>().localPosition = Camera.main.ScreenToViewportPoint(Vector3.one * 0.5f);
 
         Text titleText = uiGameObject.GetComponentsInChildren<Text>()[0];
         Text messageText = uiGameObject.GetComponentsInChildren<Text>()[1];
