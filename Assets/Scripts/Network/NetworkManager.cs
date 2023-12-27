@@ -61,7 +61,7 @@ public class NetworkManager : MonoBehaviour
 
         _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
         {
-            EventsManager<ErrorEvent>.Trigger?.Invoke(new Exception($"Error code #{model.ErrorType.ToString()}"), model.IsCritical);
+            EventsManager<ErrorEvent>.Trigger?.Invoke("Server error", new Exception($"{model.ErrorType.ToString()}"), model.IsCritical);
         });
         
         _netPacketProcessor.SubscribeNetSerializable((SuccessAuthModel model, NetPeer peer) =>

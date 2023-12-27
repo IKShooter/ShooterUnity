@@ -1,5 +1,6 @@
 ﻿using System;
 using Events;
+using LiteNetLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -15,23 +16,37 @@ namespace GameUI
         
         private void Start()
         {
+            nicknameText.text = PlayerPrefs.GetString("LastNickname");
+            
             authButton.interactable = false;
             anonAuthButton.interactable = false;
             
-            EventsManager<ServerConnectedEvent>.Register(peer =>
-            {
-                authButton.interactable = true;
-                anonAuthButton.interactable = true;
-            });
-            
-            EventsManager<SuccessAuthEvent>.Register(() =>
-            {
-                SceneManager.LoadScene("Scenes/MainMenu");
-            });
+            EventsManager<ServerConnectedEvent>.Register(OnServerConnected);
+            EventsManager<SuccessAuthEvent>.Register(OnSuccessAuth);
+        }
+
+        private void OnDestroy()
+        {
+            EventsManager<ServerConnectedEvent>.Unregister(OnServerConnected);
+            EventsManager<SuccessAuthEvent>.Unregister(OnSuccessAuth);
+        }
+
+        private void OnServerConnected(NetPeer peer)
+        {
+            authButton.interactable = true;
+            anonAuthButton.interactable = true;
+        }
+
+        private void OnSuccessAuth()
+        {
+            SceneManager.LoadScene("Scenes/MainMenu");
         }
 
         public void TryAuth()
         {
+            PlayerPrefs.SetString("LastNickname", nicknameText.text);
+            PlayerPrefs.Save();
+            
             NetworkManager.Instance.TryAuth(nicknameText.text);
         }
 

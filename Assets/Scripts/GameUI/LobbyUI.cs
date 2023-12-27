@@ -31,13 +31,7 @@ public class LobbyUI : MonoBehaviour
         RefreshRooms();
     }
     private void OnRoomList(List<RoomModel> rooms)
-    {
-        // Debug
-        foreach (var roomModel in rooms)
-        {
-            Debug.Log($"{roomModel.Name} {roomModel.PlayerCount} / ${roomModel.PlayerMax}");
-        }
-            
+    {  
         Debug.Log($"Rooms list received {rooms.Count}!");
             
         // Remove old items
@@ -50,20 +44,19 @@ public class LobbyUI : MonoBehaviour
         // Add new items
         foreach (var room in rooms)
         {
-            GameObject newItem = Instantiate(exampleItem.gameObject);
+            GameObject newItem = Instantiate(
+                exampleItem.gameObject, 
+                roomsItemsContainer.transform, 
+                true
+            );
 
             RoomsListItem newListItem = newItem.GetComponent<RoomsListItem>();
-            newListItem.GetTitleText().text = room.Name;
-            newListItem.GetInfoeText().text = $"{room.PlayerCount} / {room.PlayerMax}";
+            newListItem.SetInfo(room);
 
-            newItem.GetComponentInChildren<Button>().onClick.AddListener(() =>
-            {
-                NetworkManager.Instance.TryJoinRoom(room.Name);
-            });
+            newItem.GetComponentInChildren<Button>().onClick.AddListener(
+                () => NetworkManager.Instance.TryJoinRoom(room.Name));
             
             newItem.SetActive(true);
-            newItem.transform.SetParent(roomsItemsContainer.transform);
-            //newItem.transform.localScale = Vector3.one * 300;
         }
     }
 

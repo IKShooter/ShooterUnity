@@ -5,6 +5,7 @@ using Events;
 using Network.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Player
 {
@@ -49,6 +50,9 @@ namespace Player
                     {
                         GameObject newPlayerObject = Instantiate(Resources.Load<GameObject>("Prefabs/EnemyPlayer"));
                         
+                        Text nickNameText = newPlayerObject.GetComponentInChildren<Text>();
+                        nickNameText.text = model.Nickname;
+                        
                         remotePlayer = new RemotePlayer(model, newPlayerObject);
                         _remotePlayers.Add(remotePlayer);
                         
@@ -78,7 +82,7 @@ namespace Player
             }));
         }
 
-        private float interpolationSpeed = 4.5f;
+        private float interpolationSpeed = 5.0f;
         
         private void Update()
         {

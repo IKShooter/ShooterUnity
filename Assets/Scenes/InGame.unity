@@ -1010,7 +1010,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chatText: {fileID: 1407053538}
-  chatField: {fileID: 1086066240}
+  chatField: {fileID: 496138169}
+  chatFieldText: {fileID: 1086066240}
   messageTarget: {fileID: 1615051395}
   chatUI: {fileID: 1878644796}
   playersTableUI: {fileID: 954838710}
@@ -1981,7 +1982,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: LocalPlayer
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6723041279111477409, guid: c4db337c93c7123449170e4734c16d31, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c4db337c93c7123449170e4734c16d31, type: 3}
 --- !u!1 &1305291718 stripped
 GameObject:
@@ -2020,6 +2022,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   mouseSensitivity: 2
+  jumpForce: 18
+  gravity: 20
+  crouchScale: 0.5
 --- !u!4 &1305291721 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6723041279111477408, guid: c4db337c93c7123449170e4734c16d31, type: 3}

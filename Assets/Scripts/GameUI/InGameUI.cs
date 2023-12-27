@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Events;
 using Network;
+using Server.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,7 +11,8 @@ using UnityEngine.UI;
 public class InGameUI : MonoBehaviour
 {
     [SerializeField] private Text chatText;
-    [SerializeField] private Text chatField;
+    [SerializeField] private InputField chatField;
+    [SerializeField] private Text chatFieldText;
     [SerializeField] private Dropdown messageTarget;
 
     [SerializeField] private GameObject chatUI;
@@ -21,17 +23,13 @@ public class InGameUI : MonoBehaviour
     
     void Start()
     {
-        EventsManager<MessageReceivedEvent>.Register(message =>
-        {
-            if(_isLeaved)
-                return;
-            string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
-            Debug.Log($"MESSAGE: {sender} : {message.Text}");   
-            
-            chatText.text += $"{sender} : {message.Text}\n";
-        });
-        
+        EventsManager<MessageReceivedEvent>.Register(OnMessageReceived);
         NetworkManager.Instance.RequestAccessInRoom();
+    }
+
+    private void OnDestroy()
+    {
+        EventsManager<MessageReceivedEvent>.Unregister(OnMessageReceived);
     }
 
     private void Update()
@@ -45,12 +43,26 @@ public class InGameUI : MonoBehaviour
         }
     }
 
+    private void OnMessageReceived(MessageModel message)
+    {
+        if(_isLeaved)
+            return;
+        string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
+        Debug.Log($"MESSAGE: {sender} : {message.Text}");   
+            
+        chatText.text += $"{sender} : {message.Text}\n";
+    }
+    
     public void SendMessage()
     {
         byte typeId = Convert.ToByte(messageTarget.value);
         TypeMessage type = (TypeMessage)typeId;
-        NetworkManager.Instance.TrySendMessage(chatField.text, type);
-        chatField.text = "";
+        NetworkManager.Instance.TrySendMessage(chatFieldText.text, type);
+        
+        // FIXME: 2 different ways to clean fcking input field
+        chatFieldText.text = "";
+        chatField.Select();
+        chatField.SetTextWithoutNotify("");
     }
 
     public void LeaveFromRoom()

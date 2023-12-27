@@ -22,7 +22,7 @@ namespace Network
             => EventsManager<ServerDisconnectedEvent>.Trigger.Invoke(peer, disconnectInfo);
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
-            => EventsManager<ErrorEvent>.Trigger.Invoke(new Exception($"Network error: {socketError}"), true);
+            => EventsManager<ErrorEvent>.Trigger.Invoke("Network error", new Exception( $"{socketError}"), true);
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {

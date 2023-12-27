@@ -5,4 +5,6 @@
     public const string ServerKey = "Shooter";
     public const string VersionName = "test";
     public const ushort VersionCode = 0;
+    
+    public const float PlayerSyncTps = 16;
 }

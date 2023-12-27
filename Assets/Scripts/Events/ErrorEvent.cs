@@ -2,5 +2,5 @@
 
 namespace Events
 {
-   public delegate void ErrorEvent(Exception exception, bool isCritical);
+   public delegate void ErrorEvent(string tag, Exception exception, bool isCritical);
 }
