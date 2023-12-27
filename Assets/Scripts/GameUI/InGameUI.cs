@@ -10,6 +10,7 @@ using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
 {
+    [SerializeField] private Text chatPreviewText;
     [SerializeField] private Text chatText;
     [SerializeField] private InputField chatField;
     [SerializeField] private Text chatFieldText;
@@ -51,6 +52,18 @@ public class InGameUI : MonoBehaviour
         Debug.Log($"MESSAGE: {sender} : {message.Text}");   
             
         chatText.text += $"{sender} : {message.Text}\n";
+
+        if(!_isChatOpen)
+            ShowPreviewChatMessage(message);
+    }
+
+    private IEnumerator ShowPreviewChatMessage(MessageModel message)
+    {
+        chatPreviewText.enabled = true;
+        string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
+        chatPreviewText.text = $"{sender} : {message.Text}";
+        yield return new WaitForSeconds(2.5f);
+        chatPreviewText.enabled = true;
     }
     
     public void SendMessage()

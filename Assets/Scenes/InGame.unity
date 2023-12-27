@@ -1009,6 +1009,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fdce5d9c93be434082c11803699a216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chatPreviewText: {fileID: 0}
   chatText: {fileID: 1407053538}
   chatField: {fileID: 496138169}
   chatFieldText: {fileID: 1086066240}
@@ -2020,14 +2021,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e0a3d180b41476fbec3c506bec5097f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  mouseSensitivity: 2
-  jumpForce: 18
-  gravity: 20
-  crouchScale: 0.5
+  groundCheck: {fileID: 1305291722}
 --- !u!4 &1305291721 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6723041279111477408, guid: c4db337c93c7123449170e4734c16d31, type: 3}
+  m_PrefabInstance: {fileID: 1305291717}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1305291722 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2868342793989544465, guid: c4db337c93c7123449170e4734c16d31, type: 3}
   m_PrefabInstance: {fileID: 1305291717}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1368005294

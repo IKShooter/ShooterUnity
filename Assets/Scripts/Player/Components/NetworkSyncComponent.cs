@@ -13,12 +13,21 @@ namespace Player.Components
             _playerBody = body;
         }
         
+        private Vector3 lastPos;
+        private float lastRotY;
+        
         public void Update()
         {
-            if (Time.time - _lastNetworkUpdate > 1_000 / GameConstants.PlayerSyncTps)
+            if (Time.time - _lastNetworkUpdate > 1f / GameConstants.PlayerSyncTps)
             {
                 Transform transform = _playerBody.transform;
-                NetworkManager.Instance.UpdatePlayer(transform.position, transform.rotation.eulerAngles.y);
+
+                if (lastPos != transform.position || lastRotY != transform.rotation.eulerAngles.y)
+                {
+                    NetworkManager.Instance.UpdatePlayer(transform.position, transform.rotation.eulerAngles.y);
+                    lastPos = transform.position;
+                    lastRotY = transform.rotation.eulerAngles.y;
+                }
                 _lastNetworkUpdate = Time.time;
             }
         }

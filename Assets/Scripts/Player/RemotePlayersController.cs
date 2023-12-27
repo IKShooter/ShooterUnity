@@ -50,7 +50,7 @@ namespace Player
                     {
                         GameObject newPlayerObject = Instantiate(Resources.Load<GameObject>("Prefabs/EnemyPlayer"));
                         
-                        Text nickNameText = newPlayerObject.GetComponentInChildren<Text>();
+                        TextMesh nickNameText = newPlayerObject.GetComponentInChildren<TextMesh>();
                         nickNameText.text = model.Nickname;
                         
                         remotePlayer = new RemotePlayer(model, newPlayerObject);
@@ -90,6 +90,11 @@ namespace Player
             {
                 remotePlayer._gameObject.transform.position = Vector3.Lerp(remotePlayer._gameObject.transform.position, remotePlayer._model.Position, Time.deltaTime*interpolationSpeed);
                 remotePlayer._gameObject.transform.rotation = Quaternion.Slerp(remotePlayer._gameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f), Time.deltaTime*interpolationSpeed);
+                
+                // Rotate nick
+                GameObject nickNameTextGameObject = remotePlayer._gameObject.GetComponentInChildren<TextMesh>().gameObject;
+                if(!nickNameTextGameObject)
+                    nickNameTextGameObject.transform.LookAt(PlayerController.Instance.GetCamera().transform);
             }
         }
     }

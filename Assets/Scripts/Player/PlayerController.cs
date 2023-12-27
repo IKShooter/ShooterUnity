@@ -43,6 +43,7 @@ namespace Player
             // Update all components
             MouseControlComponent.Update();
             MovementComponent.Update();
+            NetworkSyncComponent.Update();
         }
         
         public bool IsGrounded()
