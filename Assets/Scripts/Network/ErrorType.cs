@@ -7,5 +7,7 @@
         NotValidNameRoom = 2,
         MessageInRoomNotValid = 3,
         NotValidVersion = 4,
+        RoomNameIsExists = 5,
+        RoomIsFull = 6
     }
 }

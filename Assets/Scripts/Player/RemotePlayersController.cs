@@ -57,6 +57,9 @@ namespace Player
                         _remotePlayers.Add(remotePlayer);
                         
                         newPlayerObject.transform.SetParent(playersParentGameObject.transform);
+
+                        remotePlayer._gameObject.transform.position = remotePlayer._model.Position;
+                        remotePlayer._gameObject.transform.rotation = Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f);
                         
                         Debug.Log($"Registered new player! {model.Id}");
                     }
@@ -88,12 +91,15 @@ namespace Player
         {
             foreach (var remotePlayer in _remotePlayers)
             {
-                remotePlayer._gameObject.transform.position = Vector3.Lerp(remotePlayer._gameObject.transform.position, remotePlayer._model.Position, Time.deltaTime*interpolationSpeed);
-                remotePlayer._gameObject.transform.rotation = Quaternion.Slerp(remotePlayer._gameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f), Time.deltaTime*interpolationSpeed);
+                // remotePlayer._gameObject.transform.position = Vector3.Lerp(remotePlayer._gameObject.transform.position, remotePlayer._model.Position, Time.deltaTime*interpolationSpeed);
+                // remotePlayer._gameObject.transform.rotation = Quaternion.Slerp(remotePlayer._gameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f), Time.deltaTime*interpolationSpeed);
                 
-                // Rotate nick
+                remotePlayer._gameObject.transform.position = remotePlayer._model.Position;
+                remotePlayer._gameObject.transform.rotation = Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f);
+                
+                // // Rotate nick
                 GameObject nickNameTextGameObject = remotePlayer._gameObject.GetComponentInChildren<TextMesh>().gameObject;
-                if(!nickNameTextGameObject)
+                if(nickNameTextGameObject)
                     nickNameTextGameObject.transform.LookAt(PlayerController.Instance.GetCamera().transform);
             }
         }

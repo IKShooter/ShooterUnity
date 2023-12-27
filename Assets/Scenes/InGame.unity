@@ -1009,7 +1009,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fdce5d9c93be434082c11803699a216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chatPreviewText: {fileID: 0}
+  chatPreviewText: {fileID: 1368005296}
   chatText: {fileID: 1407053538}
   chatField: {fileID: 496138169}
   chatFieldText: {fileID: 1086066240}

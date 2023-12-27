@@ -20,12 +20,17 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private GameObject playersTableUI;
 
     private bool _isLeaved;
-    private bool _isChatOpen = true;
+    private bool _isChatOpen;
+    private bool _isPlayersFieldOpen;
     
     void Start()
     {
         EventsManager<MessageReceivedEvent>.Register(OnMessageReceived);
         NetworkManager.Instance.RequestAccessInRoom();
+        
+        // Hide by default
+        playersTableUI.SetActive(false);
+        chatUI.SetActive(false);
     }
 
     private void OnDestroy()
@@ -35,6 +40,18 @@ public class InGameUI : MonoBehaviour
 
     private void Update()
     {
+        // Players filed show/hide
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            _isPlayersFieldOpen = true;
+            playersTableUI.SetActive(true);
+        } else if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            _isPlayersFieldOpen = false;
+            playersTableUI.SetActive(false);
+        }
+        
+        // Chat show/hide toggle
         if (Input.GetKeyDown(KeyCode.U))
         {
             _isChatOpen = !_isChatOpen;
@@ -54,7 +71,7 @@ public class InGameUI : MonoBehaviour
         chatText.text += $"{sender} : {message.Text}\n";
 
         if(!_isChatOpen)
-            ShowPreviewChatMessage(message);
+            StartCoroutine(ShowPreviewChatMessage(message));
     }
 
     private IEnumerator ShowPreviewChatMessage(MessageModel message)
@@ -63,7 +80,7 @@ public class InGameUI : MonoBehaviour
         string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
         chatPreviewText.text = $"{sender} : {message.Text}";
         yield return new WaitForSeconds(2.5f);
-        chatPreviewText.enabled = true;
+        chatPreviewText.enabled = false;
     }
     
     public void SendMessage()
