@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
 using Events;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -48,6 +46,9 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new RequestSendRoomMessageModel());
         netPP.RegisterNestedType(() => new RequestLeaveRoomModel());
         netPP.RegisterNestedType(() => new RequestUpdatePlayerInRoom());
+        netPP.RegisterNestedType(() => new RequestReload());
+        netPP.RegisterNestedType(() => new RequestSwitchWeaponModel());
+        netPP.RegisterNestedType(() => new RequestShootModel());
         
         //model
         netPP.RegisterNestedType(() => new RoomModel());
@@ -62,10 +63,16 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new UpdateLocalPlayerInfo());
         netPP.RegisterNestedType(() => new RemotePlayerWeaponModel());
         netPP.RegisterNestedType(() => new LocalPlayerWeaponModel());
+        netPP.RegisterNestedType(() => new ShootModel());
         
         _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
         {
             EventsManager<ErrorEvent>.Trigger?.Invoke("Server error", new Exception($"{model.ErrorType.ToString()}"), model.IsCritical);
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((ShootModel model, NetPeer peer) =>
+        {
+            EventsManager<PlayerShootEvent>.Trigger?.Invoke(model);
         });
         
         _netPacketProcessor.SubscribeNetSerializable((SuccessAuthModel model, NetPeer peer) =>
@@ -272,6 +279,27 @@ public class NetworkManager : MonoBehaviour
         RequestSwitchWeaponModel model = new RequestSwitchWeaponModel()
         {
             SlotId = slotId
+        };
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void TryReloadWeapon()
+    {
+        _writer.Reset();
+        RequestReload model = new RequestReload();
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void TryShoot(Vector3 hitPos, bool isHit, PlayerModel targetPlayerModel)
+    {
+        _writer.Reset();
+        RequestShootModel model = new RequestShootModel()
+        {
+            IsHit = isHit,
+            PosTo = hitPos,
+            TargetPlayer = targetPlayerModel
         };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);

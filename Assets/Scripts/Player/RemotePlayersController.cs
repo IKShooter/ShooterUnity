@@ -36,6 +36,14 @@ namespace Player
 
         private void Start()
         {
+            EventsManager<PlayerShootEvent>.Register(model =>
+            {
+                if(model.IsHit)
+                    Debug.Log($"SHOOTING! {model.PlayerShooter.Nickname} to {model.TargetPlayer.Nickname}");
+                else
+                    Debug.Log($"MISS SHOOT BY {model.PlayerShooter.Nickname}");
+            });
+            
             EventsManager<PlayersInRoomEvent>.Register((models =>
             {
                 Debug.Log($"PlayersInRoomEvent {models.Count}");
@@ -55,6 +63,9 @@ namespace Player
                         
                         remotePlayer = new RemotePlayer(model, newPlayerObject);
                         _remotePlayers.Add(remotePlayer);
+
+                        // Assign player data
+                        newPlayerObject.AddComponent<RemotePlayerComponent>().playerModel = model;
                         
                         newPlayerObject.transform.SetParent(playersParentGameObject.transform);
 
@@ -73,10 +84,9 @@ namespace Player
             
             EventsManager<UpdatePlayerInRoomEvent>.Register((model =>
             {
-                Debug.Log($"UpdatePlayerInRoomEvent");
                 foreach (var updatePlayerInRoom in model.updates)
                 {
-                    Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id}");
+                    // Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id}");
                 
                     RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == updatePlayerInRoom.Id);
 
