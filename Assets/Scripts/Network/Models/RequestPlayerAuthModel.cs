@@ -15,8 +15,8 @@ namespace Network.Models
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(Nickname);
-            writer.Put(VersionCode);
+           writer.Put(Nickname);
+           writer.Put(VersionCode);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using LiteNetLib.Utils;
-using Network.Models;
 
 namespace Network.Models.Player
 {
@@ -11,7 +10,7 @@ namespace Network.Models.Player
         public void Deserialize(NetDataReader reader)
         {
             Players = new List<PlayerModel>();
-            
+
             var count = reader.GetInt();
             for (int i = 0; i < count; i++)
             {

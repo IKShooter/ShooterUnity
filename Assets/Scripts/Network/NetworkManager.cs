@@ -59,6 +59,9 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new PlayersInRoom());
         netPP.RegisterNestedType(() => new UpdatePlayerInRoom());
         netPP.RegisterNestedType(() => new UpdatePlayersTickInRoom());
+        netPP.RegisterNestedType(() => new UpdateLocalPlayerInfo());
+        netPP.RegisterNestedType(() => new RemotePlayerWeaponModel());
+        netPP.RegisterNestedType(() => new LocalPlayerWeaponModel());
         
         _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
         {
@@ -119,6 +122,11 @@ public class NetworkManager : MonoBehaviour
         _netPacketProcessor.SubscribeNetSerializable((UpdatePlayersTickInRoom model, NetPeer peer) =>
         {
             EventsManager<UpdatePlayerInRoomEvent>.Trigger?.Invoke(model);
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((UpdateLocalPlayerInfo model, NetPeer peer) =>
+        {
+            EventsManager<LocalPlayerUpdateEvent>.Trigger?.Invoke(model);
         });
         
         EventsManager<ServerConnectedEvent>.Register((peer) =>
@@ -256,5 +264,16 @@ public class NetworkManager : MonoBehaviour
         };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.Unreliable);
+    }
+
+    public void TrySwitchWeapon(short slotId)
+    {
+        _writer.Reset();
+        RequestSwitchWeaponModel model = new RequestSwitchWeaponModel()
+        {
+            SlotId = slotId
+        };
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
     }
 }

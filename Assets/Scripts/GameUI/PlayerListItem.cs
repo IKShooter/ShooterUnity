@@ -9,9 +9,9 @@ namespace GameUI
         public void SetInfo(PlayerModel player)
         {
             GetComponentsInChildren<Text>()[0].text = $"{player.Nickname} ({player.Id})";
-            GetComponentsInChildren<Text>()[0].text = "0";
-            GetComponentsInChildren<Text>()[0].text = "0";
-            GetComponentsInChildren<Text>()[0].text = "0";
+            GetComponentsInChildren<Text>()[1].text = "-";
+            GetComponentsInChildren<Text>()[2].text = "-";
+            GetComponentsInChildren<Text>()[3].text = player.Ping.ToString();
         }
     }
 }

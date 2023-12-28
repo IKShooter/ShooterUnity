@@ -7,7 +7,7 @@ namespace Network.Models
     {
         public string Nickname;
         public int Id;
-
+        public ushort Ping;
         public Vector3 Position;
         public float RotationY;
 
@@ -15,6 +15,7 @@ namespace Network.Models
         {
             Nickname = reader.GetString();
             Id = reader.GetInt();
+            Ping = reader.GetUShort();
 
             Position = new Vector3();
             Position.x = reader.GetFloat();
@@ -27,6 +28,7 @@ namespace Network.Models
         {
             writer.Put(Nickname);
             writer.Put(Id);
+            writer.Put(Ping);
 
             writer.Put(Position.x);
             writer.Put(Position.y);

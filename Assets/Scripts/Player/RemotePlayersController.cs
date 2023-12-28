@@ -73,6 +73,7 @@ namespace Player
             
             EventsManager<UpdatePlayerInRoomEvent>.Register((model =>
             {
+                Debug.Log($"UpdatePlayerInRoomEvent");
                 foreach (var updatePlayerInRoom in model.updates)
                 {
                     Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id}");

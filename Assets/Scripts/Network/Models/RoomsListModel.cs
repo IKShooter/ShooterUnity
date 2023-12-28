@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using LiteNetLib.Utils;
 using Network.Models;
 
@@ -27,8 +26,6 @@ namespace Server.Models
             foreach(RoomModel roomModel in roomListModel)
             {
                 roomModel.Serialize(writer);
-                Console.WriteLine(roomModel.Name);
-                //writer.Put(roomModel);
             }
         }
     }

@@ -1,17 +1,19 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Server.Models
+namespace Network.Models
 {
-    public class RequestRoomAccessModel : INetSerializable
+    public class RequestSwitchWeaponModel : INetSerializable
     {
+        public short SlotId;
+
         public void Deserialize(NetDataReader reader)
         {
-
+            SlotId = reader.GetShort();
         }
 
         public void Serialize(NetDataWriter writer)
         {
-
+            writer.Put(SlotId);
         }
     }
 }

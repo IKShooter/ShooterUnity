@@ -5,33 +5,43 @@ namespace Experimental
 {
     public class WeaponAnimIK : MonoBehaviour
     {
-        public Transform weaponTransform; // Ссылка на трансформ оружия для тряски
-        public float shakeDuration = 0.1f; // Длительность одного цикла тряски
-        public float shakeAmount = 0.1f; // Интенсивность тряски
-        public float interpolationSpeed = 15f; // Скорость интерполяции
+        public float shakeDuration = 0.1f; 
+        public float shakeAmount = 0.1f; 
+        public float interpolationSpeed = 15f;
 
-        private Vector3 originalPos; // Исходная позиция оружия
-        private bool isFiring = false; // Флаг для определения, происходит ли выстрел
+        private Vector3 originalPos;
+        private Vector3 targetPos;
+        private bool isFiring;
+        private bool isMoving;
 
         void Start()
         {
-            if (weaponTransform != null)
-            {
-                originalPos = weaponTransform.localPosition;
-            }
+            originalPos = transform.localPosition;
         }
 
         void Update()
         {
-            if (Input.GetMouseButtonDown(0)) // ЛКМ нажата
+            if (Input.GetMouseButtonDown(0))
             {
                 isFiring = true;
                 StartCoroutine(ContinuousShake());
             }
-            else if (Input.GetMouseButtonUp(0)) // ЛКМ отпущена
+            else if (Input.GetMouseButtonUp(0))
             {
                 isFiring = false;
             }
+
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                isMoving = true;
+                StartCoroutine(ContinuousMoveShake());
+            }
+            else if (Input.GetKeyUp(KeyCode.W))
+            {
+                isMoving = false;
+            }
+            
+            transform.localPosition = Vector3.Lerp(transform.localPosition, targetPos, Time.deltaTime * interpolationSpeed);
         }
 
         IEnumerator ContinuousShake()
@@ -46,27 +56,45 @@ namespace Experimental
         IEnumerator ApplyShake()
         {
             float elapsedTime = 0f;
-            Vector3 targetPos = Vector3.zero;
+            Vector3 localTargetPos = Vector3.zero;
 
             while (elapsedTime < shakeDuration)
             {
-                // Создание случайной тряски в заданных пределах
                 Vector3 shakeOffset = Random.insideUnitSphere * shakeAmount;
-
-                // Установка целевой позиции для интерполяции
-                targetPos = originalPos + shakeOffset;
-
-                // Интерполяция до целевой позиции
-                weaponTransform.localPosition = Vector3.Lerp(weaponTransform.localPosition, targetPos, Time.deltaTime * interpolationSpeed);
-
-                // Увеличение времени прошедшего с начала тряски
+                localTargetPos = originalPos + shakeOffset;
+                targetPos = localTargetPos;
                 elapsedTime += Time.deltaTime;
 
                 yield return null;
             }
 
-            // Возвращение оружия в исходную позицию после тряски
-            weaponTransform.localPosition = originalPos;
+            targetPos = originalPos;
+        }
+        
+        float factorX = 0.02f;
+        float factorY = 0.04f;
+        private float speedFactor = 4.5f;
+        private float forwardOffset = -0.1f;
+        
+        IEnumerator ContinuousMoveShake()
+        {
+            float elapsedTime = 0f;
+            Vector3 localTargetPos = Vector3.zero;
+            
+            while (isMoving)
+            {
+                float x = Mathf.Sin(elapsedTime) * factorX;
+                float y = -Mathf.Cos(elapsedTime) * factorY;
+                
+                Vector3 shakeOffset = transform.up * y + transform.right * x + transform.forward * forwardOffset;
+                localTargetPos = originalPos + shakeOffset;
+                targetPos = localTargetPos;
+                elapsedTime += Time.deltaTime * speedFactor;
+
+                yield return null;
+            }
+            
+            this.targetPos = originalPos;
         }
     }
 }

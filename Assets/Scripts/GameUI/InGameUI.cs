@@ -6,6 +6,7 @@ using GameUI;
 using Network;
 using Network.Models;
 using Network.Models.Player;
+using Player;
 using Server.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,6 +18,8 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private InputField chatField;
     [SerializeField] private Text chatFieldText;
     [SerializeField] private Dropdown messageTarget;
+
+    [SerializeField] private Text statText;
 
     [SerializeField] private GameObject chatUI;
     [SerializeField] private PlayersListInRoomUI playersTableUI;
@@ -33,6 +36,7 @@ public class InGameUI : MonoBehaviour
     {
         EventsManager<MessageReceivedEvent>.Register(OnMessageReceived);
         EventsManager<PlayersInRoomEvent>.Register(OnPlayersInRoomUpdated);
+        EventsManager<LocalPlayerUpdateEvent>.Register(OnLocalPlayerUpdated);
         NetworkManager.Instance.RequestAccessInRoom();
         
         // Hide by default
@@ -42,7 +46,9 @@ public class InGameUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        EventsManager<LocalPlayerUpdateEvent>.Unregister(OnLocalPlayerUpdated);
         EventsManager<MessageReceivedEvent>.Unregister(OnMessageReceived);
+        EventsManager<PlayersInRoomEvent>.Unregister(OnPlayersInRoomUpdated);
     }
 
     private void Update()
@@ -82,6 +88,20 @@ public class InGameUI : MonoBehaviour
         {
             chatText.text = "";
         }
+    }
+
+    private void UpdateStat(UpdateLocalPlayerInfo model)
+    {
+        statText.text = "";
+        statText.text += $"HP: {model.Health}\n\n";
+        statText.text += $"{model.CurrentWeapon.Id}\n";
+        statText.text += $"{model.CurrentWeapon.Ammo} / {model.CurrentWeapon.AmmoReserve}";
+    }
+
+    public void OnLocalPlayerUpdated(UpdateLocalPlayerInfo model)
+    {
+        PlayerController.Instance.PlayerWeaponComponent.UpdateByModel(model);
+        UpdateStat(model);
     }
 
     private void OnPlayersInRoomUpdated(List<PlayerModel> players)

@@ -13,6 +13,7 @@ namespace Player
         public MouseControlComponent MouseControlComponent;
         public MovementComponent MovementComponent;
         public NetworkSyncComponent NetworkSyncComponent;
+        public PlayerWeaponComponent PlayerWeaponComponent;
         
         private CharacterController _characterController;
         private Camera _playerCamera;
@@ -31,6 +32,7 @@ namespace Player
             MouseControlComponent = new MouseControlComponent(_playerCamera, gameObject);
             MovementComponent = new MovementComponent(_characterController, gameObject);
             NetworkSyncComponent = new NetworkSyncComponent(gameObject);
+            PlayerWeaponComponent = new PlayerWeaponComponent(this);
             
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -44,6 +46,7 @@ namespace Player
             MouseControlComponent.Update();
             MovementComponent.Update();
             NetworkSyncComponent.Update();
+            PlayerWeaponComponent.Update();
         }
         
         public bool IsGrounded()

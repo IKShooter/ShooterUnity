@@ -1,9 +1,4 @@
 ﻿using LiteNetLib.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Network.Models
 {
@@ -20,7 +15,7 @@ namespace Network.Models
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put((ushort) ErrorType);
+            writer.Put((ushort)ErrorType);
             writer.Put(IsCritical);
         }
     }
