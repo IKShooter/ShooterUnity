@@ -38,8 +38,12 @@ namespace Player
         {
             EventsManager<PlayerShootEvent>.Register(model =>
             {
+                // Is not full missed
+                if(model.PosTo != Vector3.zero)
+                    Utils.SpawnHitParticle(model.PosTo);
+                
                 if(model.IsHit)
-                    Debug.Log($"SHOOTING! {model.PlayerShooter.Nickname} to {model.TargetPlayer.Nickname}");
+                    Debug.Log($"SHOOTING! {model.PlayerShooter.Nickname}"); // TODO: to {model.TargetPlayer.Nickname}"
                 else
                     Debug.Log($"MISS SHOOT BY {model.PlayerShooter.Nickname}");
             });

@@ -62,9 +62,9 @@ namespace Player.Components
             bool isHitRemotePlayer = isHitted && hit.collider.gameObject.name.Contains("EnemyPlayer");
             
             NetworkManager.Instance.TryShoot(
-                isHitted ? hit.transform.position : Vector3.zero, 
+                isHitted ? hit.point : Vector3.zero, 
                 isHitRemotePlayer,
-                isHitRemotePlayer ? hit.collider.gameObject.gameObject.GetComponentInChildren<RemotePlayerComponent>().playerModel : null
+                isHitRemotePlayer ? hit.collider.gameObject.gameObject.GetComponentInChildren<RemotePlayerComponent>().playerModel.Id : 0
             );
             
             if (isHitRemotePlayer)

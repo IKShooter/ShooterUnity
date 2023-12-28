@@ -292,14 +292,14 @@ public class NetworkManager : MonoBehaviour
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
     }
 
-    public void TryShoot(Vector3 hitPos, bool isHit, PlayerModel targetPlayerModel)
+    public void TryShoot(Vector3 hitPos, bool isHit, int  targetPlayerId)
     {
         _writer.Reset();
         RequestShootModel model = new RequestShootModel()
         {
             IsHit = isHit,
             PosTo = hitPos,
-            TargetPlayer = targetPlayerModel
+            TargetPlayerId = targetPlayerId
         };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);

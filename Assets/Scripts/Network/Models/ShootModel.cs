@@ -8,7 +8,7 @@ namespace Network.Models
         public PlayerModel PlayerShooter;
         public Vector3 PosTo;
         public bool IsHit;
-        public PlayerModel TargetPlayer;
+        public int TargetPlayerId;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -22,8 +22,7 @@ namespace Network.Models
             IsHit = reader.GetBool();
             if (IsHit)
             {
-                TargetPlayer = new PlayerModel();
-                TargetPlayer.Deserialize(reader);
+                TargetPlayerId = reader.GetInt();
             }
         }
 
@@ -37,7 +36,7 @@ namespace Network.Models
             writer.Put(IsHit);
 
             if (IsHit)
-                writer.Put(TargetPlayer);
+                writer.Put(TargetPlayerId);
         }
     }
 }
