@@ -8,6 +8,8 @@ namespace Network.Models.Player
         public Vector3 Position;
         public float RotationY;
 
+        public float RotationCameraX;
+
         public void Deserialize(NetDataReader reader)
         {
             Position = new Vector3();
@@ -15,6 +17,8 @@ namespace Network.Models.Player
             Position.y = reader.GetFloat();
             Position.z = reader.GetFloat();
             RotationY = reader.GetFloat();
+
+            RotationCameraX = reader.GetFloat();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -23,6 +27,8 @@ namespace Network.Models.Player
             writer.Put(Position.y);
             writer.Put(Position.z);
             writer.Put(RotationY);
+
+            writer.Put(RotationCameraX);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Network;
 using Network.Models;
 using Server.Models;
 using UnityEngine;
@@ -47,20 +48,25 @@ namespace Player.Components
 
         private void Shoot()
         {
+            GameObject weaponGameObject = _weaponPoint.GetWeaponGameObject();
+            weaponGameObject.GetComponentInChildren<ShootEmitter>()?.Emit();
+            
             // int ignoreRaycastLayer = LayerMask.NameToLayer("Player");
             // int layerMask = 1 << ignoreRaycastLayer;
+
+            bool isMelee = currentWeapon.Type == WeaponType.Melee;
             
             RaycastHit hit;
             bool isHitted = Physics.Raycast(
                 _controller.GetCamera().gameObject.transform.position + _controller.GetCamera().gameObject.transform.forward * 1f,
                 _controller.GetCamera().gameObject.transform.forward,
                 out hit,
-                1000f,
+                isMelee ? 1f : 1000f,
                 1
             );
 
             bool isHitRemotePlayer = isHitted && hit.collider.gameObject.name.Contains("EnemyPlayer");
-            
+
             NetworkManager.Instance.TryShoot(
                 isHitted ? hit.point : Vector3.zero, 
                 isHitRemotePlayer,
@@ -69,7 +75,24 @@ namespace Player.Components
             
             if (isHitRemotePlayer)
                 Debug.Log($"Hitted enemy! {hit.collider.gameObject.name}");
+
+            if (currentWeapon.Type == WeaponType.Shotgun)
+            {
+                // TODO
+                MakeShootImpulse();
+            }
         }
+
+        private void MakeShootImpulse()
+        {
+            CharacterController characterController = _controller.GetCharacterController();
+            Vector3 impulseDirection = -_controller.transform.forward * 1.8f; // Adjust the impulse direction and magnitude as needed
+            float impulseForce = 5.0f; // Adjust the force magnitude as needed
+
+            // Apply the impulse using Move
+            characterController.Move(impulseDirection * impulseForce * Time.deltaTime);
+        }
+
 
         private void ReloadWeapon()
         {

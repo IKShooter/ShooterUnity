@@ -1,4 +1,5 @@
-﻿using DitzelGames.FastIK;
+﻿using System;
+using DitzelGames.FastIK;
 using Network.Models;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ public class WeaponPoint : MonoBehaviour
         rightHand.GetComponent<FastIKFabric>().Target = null;
     }
 
-    public void SetActiveWeapon(LocalPlayerWeaponModel weaponModel)
+    public void SetActiveWeapon(RemotePlayerWeaponModel weaponModel)
     {
         if(activeWeapon && activeWeapon.Id == weaponModel.Id)
             return;
@@ -31,9 +32,31 @@ public class WeaponPoint : MonoBehaviour
         activeWeaponObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Weapons/{weaponModel.Id}"));
         activeWeapon = activeWeaponObject.AddComponent<Weapon>();
 
-        activeWeapon.SetDataFromModel(weaponModel);
+        activeWeapon.SetDataFromRemoteModel(weaponModel);
         
-        activeWeaponObject.transform.SetParent(transform);
+        UpdateWeapon();
+    }
+
+    public void SetActiveWeapon(LocalPlayerWeaponModel weaponModel)
+    {
+        if (activeWeapon && activeWeapon.Id == weaponModel.Id)
+            return;
+        
+        RemoveActiveWeapon();
+        
+        Destroy(activeWeaponObject);
+
+        activeWeaponObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Weapons/{weaponModel.Id}"));
+        activeWeapon = activeWeaponObject.AddComponent<Weapon>();
+
+        activeWeapon.SetDataFromLocalModel(weaponModel);
+
+        UpdateWeapon();
+    }
+    
+    private void UpdateWeapon() 
+    {
+        activeWeaponObject.transform.SetParent(transform, false);
         activeWeaponObject.transform.localPosition = Vector3.zero;
         activeWeaponObject.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
 
@@ -52,9 +75,27 @@ public class WeaponPoint : MonoBehaviour
         
         leftHand.GetComponent<FastIKFabric>().Target = leftHandTarget;
         rightHand.GetComponent<FastIKFabric>().Target = rightHandTarget;
+        
+        pinPoint.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
 
-        Vector3 toPos = pinPoint.position;
-        Vector3 offset = toPos - transform.position;
-        activeWeaponObject.transform.localPosition += offset;
+        // Math new weapon position
+        float aX = pinPoint.localPosition.x;
+        float aY = pinPoint.localPosition.y;
+        float aZ = pinPoint.localPosition.z;
+
+        float bX = transform.localPosition.x;
+        float bY = transform.localPosition.y;
+        float bZ = transform.localPosition.z;
+
+        float xF = (aX - bX);
+        float yF = (aY - bY);
+        float zF = (bZ - aZ);
+
+        activeWeaponObject.transform.localPosition = new Vector3(xF, yF, zF);
+    }
+
+    public GameObject GetWeaponGameObject()
+    {
+        return activeWeaponObject;
     }
 }

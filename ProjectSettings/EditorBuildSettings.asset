@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/InGame.unity
     guid: c5e346b0062ff114f822679bf55cfa7d
+  - enabled: 1
+    path: Assets/Scenes/Maps/Polygon.unity
+    guid: 6afa90cb17452c140a2a89dad653b256
   m_configObjects: {}

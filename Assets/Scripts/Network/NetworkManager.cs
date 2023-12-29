@@ -49,6 +49,7 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new RequestReload());
         netPP.RegisterNestedType(() => new RequestSwitchWeaponModel());
         netPP.RegisterNestedType(() => new RequestShootModel());
+        netPP.RegisterNestedType(() => new RequestRespawn());
         
         //model
         netPP.RegisterNestedType(() => new RoomModel());
@@ -64,6 +65,7 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new RemotePlayerWeaponModel());
         netPP.RegisterNestedType(() => new LocalPlayerWeaponModel());
         netPP.RegisterNestedType(() => new ShootModel());
+        netPP.RegisterNestedType(() => new LocalPlayerRespawnModel());
         
         _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
         {
@@ -134,6 +136,11 @@ public class NetworkManager : MonoBehaviour
         _netPacketProcessor.SubscribeNetSerializable((UpdateLocalPlayerInfo model, NetPeer peer) =>
         {
             EventsManager<LocalPlayerUpdateEvent>.Trigger?.Invoke(model);
+        });
+        
+        _netPacketProcessor.SubscribeNetSerializable((LocalPlayerRespawnModel model, NetPeer peer) =>
+        {
+            EventsManager<RespawnEvent>.Trigger?.Invoke(model.Pos, model.Rot);
         });
         
         EventsManager<ServerConnectedEvent>.Register((peer) =>
@@ -261,13 +268,14 @@ public class NetworkManager : MonoBehaviour
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
     }
 
-    public void UpdatePlayer(Vector3 transformPosition, float verticalRotation)
+    public void UpdatePlayer(Vector3 transformPosition, float verticalRotation, float horizontalRotation)
     {
         _writer.Reset();
         RequestUpdatePlayerInRoom model = new RequestUpdatePlayerInRoom()
         {
             Position = transformPosition,
-            RotationY = verticalRotation
+            RotationY = verticalRotation,
+            RotationCameraX = horizontalRotation
         };
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.Unreliable);
@@ -301,6 +309,14 @@ public class NetworkManager : MonoBehaviour
             PosTo = hitPos,
             TargetPlayerId = targetPlayerId
         };
+        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
+        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+    }
+
+    public void Respawn()
+    {
+        _writer.Reset();
+        RequestRespawn model = new RequestRespawn();
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
     }

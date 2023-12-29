@@ -13,6 +13,8 @@ namespace Player
     {
         public PlayerModel _model;
         public GameObject _gameObject;
+        public RemoteCameraJoin cameraJoin;
+        public WeaponPoint WeaponPoint;
         public bool isDead;
         
         public RemotePlayer(PlayerModel model, GameObject gameObject)
@@ -27,6 +29,8 @@ namespace Player
         public RemotePlayersController Instance;
 
         [SerializeField] private GameObject playersParentGameObject;
+        
+        private float interpolationSpeed = 5.0f;
         
         public RemotePlayersController()
         {
@@ -71,6 +75,10 @@ namespace Player
 
                         // Assign player data
                         newPlayerObject.AddComponent<RemotePlayerComponent>().playerModel = model;
+
+                        remotePlayer.cameraJoin = newPlayerObject.GetComponentInChildren<RemoteCameraJoin>();
+
+                        remotePlayer.WeaponPoint = newPlayerObject.GetComponentInChildren<WeaponPoint>();
                         
                         newPlayerObject.transform.SetParent(playersParentGameObject.transform);
 
@@ -82,6 +90,7 @@ namespace Player
                     else
                     {
                         remotePlayer._model.RotationY = model.RotationY;
+                        remotePlayer._model.RotationCameraX = model.RotationCameraX;
                         remotePlayer._model.Position = model.Position;
                     }
                 }
@@ -105,35 +114,44 @@ namespace Player
             {
                 foreach (var updatePlayerInRoom in model.updates)
                 {
-                    // Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id}");
+                    // Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id} ({updatePlayerInRoom.Position.y})");
                 
                     RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == updatePlayerInRoom.Id);
 
                     if (remotePlayer != null)
                     {
                         remotePlayer._model.RotationY = updatePlayerInRoom.RotationY;
+                        remotePlayer._model.RotationCameraX = updatePlayerInRoom.RotationCameraX;
                         remotePlayer._model.Position = updatePlayerInRoom.Position;
                         remotePlayer._model.Ping = updatePlayerInRoom.Ping;
                         remotePlayer.isDead = updatePlayerInRoom.IsDead;
                         
-                        gameObject.SetActive(updatePlayerInRoom.IsDead);
+                        remotePlayer.WeaponPoint.SetActiveWeapon(updatePlayerInRoom.CurrentWeapon);
                     }
                 }
             }));
         }
 
-        private float interpolationSpeed = 5.0f;
         
         private void Update()
         {
             foreach (var remotePlayer in _remotePlayers)
             {
+                remotePlayer._gameObject.SetActive(!remotePlayer.isDead);
+                if(remotePlayer.isDead) // Skip player update is dead
+                    continue;
+                
                 remotePlayer._gameObject.transform.position = Vector3.Lerp(remotePlayer._gameObject.transform.position, remotePlayer._model.Position, Time.deltaTime*interpolationSpeed);
                 remotePlayer._gameObject.transform.rotation = Quaternion.Slerp(remotePlayer._gameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f), Time.deltaTime*interpolationSpeed);
-                
-                // Without interpolation
-                // remotePlayer._gameObject.transform.position = remotePlayer._model.Position;
-                // remotePlayer._gameObject.transform.rotation = Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f);
+                remotePlayer.cameraJoin.transform.rotation = Quaternion.Slerp(
+                    remotePlayer.cameraJoin.transform.rotation, 
+                    Quaternion.Euler(
+                        remotePlayer._model.RotationCameraX, 
+                        remotePlayer.cameraJoin.transform.rotation.y,
+                        remotePlayer.cameraJoin.transform.rotation.z
+                    ),
+                Time.deltaTime*interpolationSpeed
+                );
                 
                 // Rotate nick
                 GameObject nickNameTextGameObject = remotePlayer._gameObject.GetComponentInChildren<TextMesh>().gameObject;

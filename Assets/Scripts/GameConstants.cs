@@ -6,5 +6,5 @@
     public const string VersionName = "test";
     public const ushort VersionCode = 0;
     
-    public const float PlayerSyncTps = 24;
+    public const float PlayerSyncTps = 20;
 }

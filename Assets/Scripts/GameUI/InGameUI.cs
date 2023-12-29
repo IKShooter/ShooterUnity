@@ -37,11 +37,15 @@ public class InGameUI : MonoBehaviour
         EventsManager<MessageReceivedEvent>.Register(OnMessageReceived);
         EventsManager<PlayersInRoomEvent>.Register(OnPlayersInRoomUpdated);
         EventsManager<LocalPlayerUpdateEvent>.Register(OnLocalPlayerUpdated);
+        EventsManager<RespawnEvent>.Register(OnRespawn);
         NetworkManager.Instance.RequestAccessInRoom();
         
         // Hide by default
         playersTableUI.gameObject.SetActive(false);
         chatUI.SetActive(false);
+        
+        // Load scene
+        ScenesManager.Instance.LoadLevel(NetworkManager.Instance.GetCurrentRoom().SceneName);
     }
 
     private void OnDestroy()
@@ -49,10 +53,14 @@ public class InGameUI : MonoBehaviour
         EventsManager<LocalPlayerUpdateEvent>.Unregister(OnLocalPlayerUpdated);
         EventsManager<MessageReceivedEvent>.Unregister(OnMessageReceived);
         EventsManager<PlayersInRoomEvent>.Unregister(OnPlayersInRoomUpdated);
+        EventsManager<RespawnEvent>.Unregister(OnRespawn);
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+            NetworkManager.Instance.Respawn();
+        
         // Players filed show/hide
         if (Input.GetKeyDown(KeyCode.Tab))
         {
@@ -71,6 +79,8 @@ public class InGameUI : MonoBehaviour
         {
             _isChatOpen = !_isChatOpen;
             chatUI.SetActive(_isChatOpen);
+            
+            PlayerController.Instance.SetInputLock(_isChatOpen);
 
             if (_isChatOpen)
             {
@@ -84,10 +94,19 @@ public class InGameUI : MonoBehaviour
             Cursor.lockState = _isChatOpen ? CursorLockMode.None : CursorLockMode.Locked;
         }
 
-        if (lastMessageTime != 0f && Time.time - lastMessageTime > 2.5f)
+        if (!_isChatOpen && lastMessageTime != 0f && Time.time - lastMessageTime > 2.5f)
         {
             chatText.text = "";
         }
+    }
+
+    private void OnRespawn(Vector3 pos, Vector3 rot)
+    {
+        PlayerController.Instance.GetCharacterController().enabled = false;
+        Transform transform = PlayerController.Instance.gameObject.transform;
+        transform.position = pos;
+        transform.rotation = Quaternion.Euler(rot);
+        PlayerController.Instance.GetCharacterController().enabled = true;
     }
 
     private void UpdateStat(UpdateLocalPlayerInfo model)
@@ -100,6 +119,8 @@ public class InGameUI : MonoBehaviour
 
     public void OnLocalPlayerUpdated(UpdateLocalPlayerInfo model)
     {
+        PlayerController.Instance.NetworkSyncComponent.SetIsAlive(!model.IsDead);
+        
         PlayerController.Instance.PlayerWeaponComponent.UpdateByModel(model);
         UpdateStat(model);
     }
@@ -113,7 +134,12 @@ public class InGameUI : MonoBehaviour
     {
         if(_isLeaved) return;
         
-        allMessages.Add(message);
+        allMessages.Add(new MessageModel()
+        {
+            SenderNickname = message.SenderNickname,
+            Type = message.Type,
+            Text = message.Text
+        });
         
         string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
         chatText.text += $"{sender} : {message.Text}\n";

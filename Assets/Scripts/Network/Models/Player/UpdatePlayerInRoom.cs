@@ -10,8 +10,9 @@ namespace Network.Models.Player
         public bool IsDead;
         public Vector3 Position;
         public float RotationY;
+        public float RotationCameraX;
         public RemotePlayerWeaponModel CurrentWeapon;
-        
+
         public void Deserialize(NetDataReader reader)
         {
             Id = reader.GetInt();
@@ -25,7 +26,10 @@ namespace Network.Models.Player
             Position.x = reader.GetFloat();
             Position.y = reader.GetFloat();
             Position.z = reader.GetFloat();
+
             RotationY = reader.GetFloat();
+
+            RotationCameraX = reader.GetFloat();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -38,7 +42,10 @@ namespace Network.Models.Player
             writer.Put(Position.x);
             writer.Put(Position.y);
             writer.Put(Position.z);
+
             writer.Put(RotationY);
+
+            writer.Put(RotationCameraX);
         }
     }
 }

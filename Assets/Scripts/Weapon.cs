@@ -12,12 +12,23 @@ public class Weapon : MonoBehaviour
     public float FireRate;
     public float ReloadTime;
 
-    public void SetDataFromModel(LocalPlayerWeaponModel weaponModel)
+    public void SetDataFromLocalModel(LocalPlayerWeaponModel weaponModel)
     {
         Id = weaponModel.Id;
         IsCanZoom = weaponModel.IsCanZoom;
         IndexInSlot = weaponModel.IndexInSlot;
         Weight = weaponModel.Weight;
+        Type = weaponModel.Type;
+        FireRate = weaponModel.FireRate;
+        ReloadTime = weaponModel.ReloadTime;
+    }
+
+    public void SetDataFromRemoteModel(RemotePlayerWeaponModel weaponModel)
+    {
+        Id = weaponModel.Id;
+        IsCanZoom = false;
+        IndexInSlot = 0;
+        Weight = 0;
         Type = weaponModel.Type;
         FireRate = weaponModel.FireRate;
         ReloadTime = weaponModel.ReloadTime;

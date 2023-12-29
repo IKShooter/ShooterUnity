@@ -18,6 +18,8 @@ namespace Player
         private CharacterController _characterController;
         private Camera _playerCamera;
 
+        private bool _isInputLocked;
+        
         public PlayerController()
         {
             Instance = this;
@@ -31,7 +33,7 @@ namespace Player
             // Init components
             MouseControlComponent = new MouseControlComponent(_playerCamera, gameObject);
             MovementComponent = new MovementComponent(_characterController, gameObject);
-            NetworkSyncComponent = new NetworkSyncComponent(gameObject);
+            NetworkSyncComponent = new NetworkSyncComponent(gameObject, GetCamera());
             PlayerWeaponComponent = new PlayerWeaponComponent(this);
             
             Cursor.lockState = CursorLockMode.Locked;
@@ -40,7 +42,7 @@ namespace Player
         private void Update()
         {
             // Don't do anything if controller disabled
-            if(!_characterController.enabled) return;
+            if(!_characterController.enabled || _isInputLocked) return;
         
             // Update all components
             MouseControlComponent.Update();
@@ -64,6 +66,16 @@ namespace Player
         public CharacterController GetCharacterController()
         {
             return _characterController;
+        }
+
+        public bool IsInputLocked()
+        {
+            return _isInputLocked;
+        }
+
+        public void SetInputLock(bool isLocked)
+        {
+            _isInputLocked = isLocked;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Network.Models
         public ushort Ping;
         public Vector3 Position;
         public float RotationY;
+        public float RotationCameraX;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -22,6 +23,8 @@ namespace Network.Models
             Position.y = reader.GetFloat();
             Position.z = reader.GetFloat();
             RotationY = reader.GetFloat();
+
+            RotationCameraX = reader.GetFloat();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -34,6 +37,8 @@ namespace Network.Models
             writer.Put(Position.y);
             writer.Put(Position.z);
             writer.Put(RotationY);
+
+            writer.Put(RotationCameraX);
         }
     }
 }
