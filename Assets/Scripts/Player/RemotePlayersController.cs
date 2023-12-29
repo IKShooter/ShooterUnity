@@ -13,7 +13,8 @@ namespace Player
     {
         public PlayerModel _model;
         public GameObject _gameObject;
-
+        public bool isDead;
+        
         public RemotePlayer(PlayerModel model, GameObject gameObject)
         {
             _model = model;
@@ -84,6 +85,20 @@ namespace Player
                         remotePlayer._model.Position = model.Position;
                     }
                 }
+                
+                // Track leaved players
+                foreach (RemotePlayer remotePlayer in _remotePlayers)
+                {
+                    // Is leaved
+                    if (models.Find(model => model.Id == remotePlayer._model.Id) == null)
+                    {
+                        EventsManager<RemotePlayerLeaveEvent>.Trigger?.Invoke(remotePlayer._model);
+                        Destroy(remotePlayer._gameObject);
+                        // Debug.Log($"CURVA, DESTROYED!!! {remotePlayer._model.Nickname}");
+                        _remotePlayers.Remove(remotePlayer);
+                        break;
+                    }
+                }
             }));
             
             EventsManager<UpdatePlayerInRoomEvent>.Register((model =>
@@ -98,6 +113,10 @@ namespace Player
                     {
                         remotePlayer._model.RotationY = updatePlayerInRoom.RotationY;
                         remotePlayer._model.Position = updatePlayerInRoom.Position;
+                        remotePlayer._model.Ping = updatePlayerInRoom.Ping;
+                        remotePlayer.isDead = updatePlayerInRoom.IsDead;
+                        
+                        gameObject.SetActive(updatePlayerInRoom.IsDead);
                     }
                 }
             }));

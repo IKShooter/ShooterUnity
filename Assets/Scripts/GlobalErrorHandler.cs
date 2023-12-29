@@ -29,8 +29,6 @@ public class GlobalErrorHandler : MonoBehaviour
     {
         GameObject dialogAsset = Resources.Load<GameObject>("Prefabs/UI/ErrorDialog");
         GameObject uiGameObject = Instantiate(dialogAsset);
-        
-        uiGameObject.GetComponentInChildren<RectTransform>().localPosition = Camera.main.ScreenToViewportPoint(Vector3.one * 0.5f);
 
         Text titleText = uiGameObject.GetComponentsInChildren<Text>()[0];
         Text messageText = uiGameObject.GetComponentsInChildren<Text>()[1];
@@ -53,7 +51,18 @@ public class GlobalErrorHandler : MonoBehaviour
         {
             Debug.Log("Canvas is not found!");
         }
+
+        uiGameObject.GetComponentsInChildren<Button>()[0].onClick.AddListener(() =>
+        {
+            Destroy(uiGameObject);
+        });
         
         uiGameObject.transform.SetParent(canvasGameObject.transform);
+        
+        // Magic centering
+        RectTransform rectTransform = uiGameObject.GetComponent<RectTransform>();
+        rectTransform.SetParent(canvasGameObject.transform, false);
+        rectTransform.localPosition = Vector3.zero + new Vector3(0f, 0f, 1f);
+
     }
 }
