@@ -26,7 +26,7 @@ public class InGameUI : MonoBehaviour
 
     private bool _isLeaved;
     private bool _isChatOpen;
-    private bool _isPlayersFieldOpen;
+    //private bool _isPlayersFieldOpen;
 
     private float lastMessageTime = 0f;
     
@@ -58,18 +58,18 @@ public class InGameUI : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKeyDown(KeyCode.Mouse0) && !PlayerController.Instance.NetworkSyncComponent.IsAlive)
             NetworkManager.Instance.Respawn();
         
         // Players filed show/hide
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            _isPlayersFieldOpen = true;
+            //_isPlayersFieldOpen = true;
             playersTableUI.gameObject.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
         } else if (Input.GetKeyUp(KeyCode.Tab))
         {
-            _isPlayersFieldOpen = false;
+            //_isPlayersFieldOpen = false;
             playersTableUI.gameObject.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -102,6 +102,8 @@ public class InGameUI : MonoBehaviour
 
     private void OnRespawn(Vector3 pos, Vector3 rot)
     {
+        Debug.Log("RESPAWN!");
+        
         PlayerController.Instance.GetCharacterController().enabled = false;
         Transform transform = PlayerController.Instance.gameObject.transform;
         transform.position = pos;

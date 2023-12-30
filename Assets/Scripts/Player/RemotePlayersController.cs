@@ -41,6 +41,19 @@ namespace Player
 
         private void Start()
         {
+            EventsManager<OtherDamageEvent>.Register(model =>
+            {
+                foreach (var remotePlayer in _remotePlayers)
+                {
+                    if (remotePlayer._model.Id == model.PlayerHitedId)
+                    {
+                        // TODO: Process dmg type
+                        remotePlayer._gameObject.GetComponentInChildren<DmgNumberEmitter>().SpawnNumber(model.Damage);
+                        break;
+                    }
+                }
+            });
+            
             EventsManager<PlayerShootEvent>.Register(model =>
             {
                 // Is not full missed
@@ -72,6 +85,9 @@ namespace Player
                         
                         remotePlayer = new RemotePlayer(model, newPlayerObject);
                         _remotePlayers.Add(remotePlayer);
+                        
+                        // Disable nickname
+                        remotePlayer._gameObject.GetComponentInChildren<TextMesh>().gameObject.SetActive(false);
 
                         // Assign player data
                         newPlayerObject.AddComponent<RemotePlayerComponent>().playerModel = model;
@@ -154,10 +170,11 @@ namespace Player
                 );
                 
                 // Rotate nick
-                GameObject nickNameTextGameObject = remotePlayer._gameObject.GetComponentInChildren<TextMesh>().gameObject;
-                if (nickNameTextGameObject)
+                TextMesh nickNameText = remotePlayer._gameObject.GetComponentInChildren<TextMesh>();
+                if (nickNameText)
                 {
-                    GameObject go = PlayerController.Instance.GetCamera().gameObject;
+                    GameObject nickNameTextGameObject = nickNameText.gameObject;
+                    GameObject go = PlayerController.Instance.GetMainCamera().gameObject;
                     Vector3 heading = go.transform.position - nickNameTextGameObject.transform.position;
                     nickNameTextGameObject.transform.LookAt(nickNameTextGameObject.transform.position - heading);
                 }

@@ -17,6 +17,7 @@ namespace Player
         
         private CharacterController _characterController;
         private Camera _playerCamera;
+        private Camera _playerWeaponCamera;
 
         private bool _isInputLocked;
         
@@ -28,12 +29,13 @@ namespace Player
         private void Start()
         {
             _characterController = GetComponent<CharacterController>();
-            _playerCamera = GetComponentInChildren<Camera>();
+            _playerCamera = GetComponentsInChildren<Camera>()[0];
+            _playerWeaponCamera = GetComponentsInChildren<Camera>()[1];
         
             // Init components
-            MouseControlComponent = new MouseControlComponent(_playerCamera, gameObject);
+            MouseControlComponent = new MouseControlComponent(GetMainCamera(), gameObject);
             MovementComponent = new MovementComponent(_characterController, gameObject);
-            NetworkSyncComponent = new NetworkSyncComponent(gameObject, GetCamera());
+            NetworkSyncComponent = new NetworkSyncComponent(gameObject, GetMainCamera());
             PlayerWeaponComponent = new PlayerWeaponComponent(this);
             
             Cursor.lockState = CursorLockMode.Locked;
@@ -58,7 +60,12 @@ namespace Player
             return Physics.CheckSphere(groundCheck.position, 0.2f, ~layerMask);
         }
 
-        public Camera GetCamera()
+        public Camera GetWeaponCamera()
+        {
+            return _playerWeaponCamera;
+        }
+
+        public Camera GetMainCamera()
         {
             return _playerCamera;
         }

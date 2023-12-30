@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8176347431781870824}
   - component: {fileID: 3359547914960526278}
   - component: {fileID: 6750204975861531288}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -91,7 +91,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 134344168735681587}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PinPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -121,7 +121,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5671722097238462498}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TargetRightHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -151,7 +151,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2302345260154987767}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -188,7 +188,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7880849757686624753}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TargetLeftHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -220,7 +220,7 @@ GameObject:
   - component: {fileID: 6831612107361200634}
   - component: {fileID: 2956437721412831736}
   - component: {fileID: 3539458991725681299}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -302,7 +302,7 @@ GameObject:
   - component: {fileID: 5329352240454909802}
   - component: {fileID: 3448964068271767992}
   - component: {fileID: 1202687857851529007}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -383,7 +383,7 @@ GameObject:
   - component: {fileID: 5382087872626760887}
   - component: {fileID: 5004854764831287011}
   - component: {fileID: 603484543807359713}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -462,7 +462,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2616702844471103295}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TargetLeftHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -492,7 +492,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6104065461219017607}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TargetRightHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}

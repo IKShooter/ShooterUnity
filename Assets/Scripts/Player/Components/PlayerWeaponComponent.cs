@@ -22,7 +22,7 @@ namespace Player.Components
         public PlayerWeaponComponent(PlayerController controller)
         {
             _controller = controller;
-            _weaponPoint = controller.GetCamera().gameObject.GetComponentInChildren<WeaponPoint>();
+            _weaponPoint = controller.GetWeaponCamera().gameObject.GetComponentInChildren<WeaponPoint>();
         }
 
         public void Update()
@@ -37,7 +37,7 @@ namespace Player.Components
                 });
             }
 
-            if (Input.GetKeyDown(KeyCode.Mouse0) && currentWeapon.Ammo > 0)
+            if (Input.GetKeyDown(KeyCode.Mouse0) && (currentWeapon.Ammo > 0 || currentWeapon.Type == WeaponType.Melee))
             {
                 if (!_weaponPoint.GetWeaponAnimIK().IsReload)
                 {
@@ -71,7 +71,7 @@ namespace Player.Components
         {
             while (isShoot)
             {
-                if (currentWeapon.Ammo <= 0)
+                if (currentWeapon.Ammo <= 0 && currentWeapon.Type != WeaponType.Melee)
                 {
                     isShoot = false;
                     yield break;
@@ -106,8 +106,8 @@ namespace Player.Components
             
             RaycastHit hit;
             bool isHitted = Physics.Raycast(
-                _controller.GetCamera().gameObject.transform.position + _controller.GetCamera().gameObject.transform.forward * 1f,
-                _controller.GetCamera().gameObject.transform.forward,
+                _controller.GetMainCamera().gameObject.transform.position + _controller.GetMainCamera().gameObject.transform.forward * 1f,
+                _controller.GetMainCamera().gameObject.transform.forward,
                 out hit,
                 isMelee ? 1f : 1000f,
                 1

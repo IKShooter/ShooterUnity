@@ -66,6 +66,7 @@ public class NetworkManager : MonoBehaviour
         netPP.RegisterNestedType(() => new LocalPlayerWeaponModel());
         netPP.RegisterNestedType(() => new ShootModel());
         netPP.RegisterNestedType(() => new LocalPlayerRespawnModel());
+        netPP.RegisterNestedType(() => new DamageInfoModel());
         
         _netPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
         {
@@ -143,6 +144,11 @@ public class NetworkManager : MonoBehaviour
             EventsManager<RespawnEvent>.Trigger?.Invoke(model.Pos, model.Rot);
         });
         
+        _netPacketProcessor.SubscribeNetSerializable((DamageInfoModel model, NetPeer peer) =>
+        {
+            EventsManager<OtherDamageEvent>.Trigger?.Invoke(model);
+        });
+        
         EventsManager<ServerConnectedEvent>.Register((peer) =>
         {
             _serverPeer = peer;
@@ -154,6 +160,7 @@ public class NetworkManager : MonoBehaviour
             _serverPeer = peer;
             Debug.Log("Disconnected!");
         });
+        
         
         TryConnect();
     }
@@ -319,5 +326,7 @@ public class NetworkManager : MonoBehaviour
         RequestRespawn model = new RequestRespawn();
         _netPacketProcessor.WriteNetSerializable(_writer, ref model);
         _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        
+        Debug.Log("SENDED RESPAWN!!!");
     }
 }

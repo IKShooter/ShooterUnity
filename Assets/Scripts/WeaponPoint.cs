@@ -37,7 +37,7 @@ public class WeaponPoint : MonoBehaviour
 
         activeWeapon.SetDataFromRemoteModel(weaponModel);
         
-        UpdateWeapon();
+        UpdateWeapon(false);
     }
 
     public void SetActiveWeapon(LocalPlayerWeaponModel weaponModel)
@@ -54,10 +54,10 @@ public class WeaponPoint : MonoBehaviour
 
         activeWeapon.SetDataFromLocalModel(weaponModel);
 
-        UpdateWeapon();
+        UpdateWeapon(true);
     }
     
-    private void UpdateWeapon() 
+    private void UpdateWeapon(bool isSecondLayer) 
     {
         activeWeaponObject.transform.SetParent(transform, false);
         activeWeaponObject.transform.localPosition = Vector3.zero;
@@ -68,6 +68,9 @@ public class WeaponPoint : MonoBehaviour
         Transform pinPoint = null;
         foreach (Transform tr in activeWeaponObject.transform)
         {
+            if(!isSecondLayer)
+                tr.gameObject.layer = LayerMask.NameToLayer("Default");
+            
             if (tr.gameObject.name == "TargetLeftHand")
                 leftHandTarget = tr;
             if (tr.gameObject.name == "TargetRightHand")
@@ -82,13 +85,13 @@ public class WeaponPoint : MonoBehaviour
         pinPoint.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
 
         // Math new weapon position
-        float aX = pinPoint.localPosition.x;
-        float aY = pinPoint.localPosition.y;
-        float aZ = pinPoint.localPosition.z;
+        float aX = pinPoint.position.x;
+        float aY = pinPoint.position.y;
+        float aZ = pinPoint.position.z;
 
-        float bX = transform.localPosition.x;
-        float bY = transform.localPosition.y;
-        float bZ = transform.localPosition.z;
+        float bX = transform.position.x;
+        float bY = transform.position.y;
+        float bZ = transform.position.z;
 
         float xF = (aX - bX);
         float yF = (aY - bY);
@@ -96,7 +99,10 @@ public class WeaponPoint : MonoBehaviour
 
         activeWeaponObject.transform.localPosition = new Vector3(xF, yF, zF);
         
-        _weaponAnimIK = activeWeaponObject.AddComponent<WeaponAnimIK>();
+        // Add weapon anim to this weapon point
+        _weaponAnimIK = gameObject.GetComponent<WeaponAnimIK>();
+        if(_weaponAnimIK == null)
+            _weaponAnimIK = gameObject.AddComponent<WeaponAnimIK>();
     }
 
     public GameObject GetWeaponGameObject()

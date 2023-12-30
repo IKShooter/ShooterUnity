@@ -11,6 +11,11 @@ namespace Player.Components
 
         private bool _isAlive;
 
+        public bool IsAlive
+        {
+            get => _isAlive;
+        }
+
         public NetworkSyncComponent(GameObject body, Camera camera)
         {
             _playerBody = body;
