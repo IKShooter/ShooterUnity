@@ -17,6 +17,13 @@ namespace Player.Components
         private readonly CharacterController _characterController;
         private readonly GameObject _body;
 
+        private bool _isMoving;
+
+        public bool IsMoving
+        {
+            get => _isMoving; 
+        }
+
         public MovementComponent(CharacterController characterController, GameObject body)
         {
             _characterController = characterController;
@@ -34,6 +41,9 @@ namespace Player.Components
 
             Vector3 movement = _body.transform.right * horizontalMovement + _body.transform.forward * verticalMovement;
             _characterController.Move(movement);
+
+            // Track is moving var
+            _isMoving = horizontalMovement + verticalMovement != 0;
 
             // Apply gravity
             _verticalVelocity += Physics.gravity.y * Time.deltaTime;

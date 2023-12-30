@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
+using Random = UnityEngine.Random;
 
 namespace Experimental
 {
@@ -14,6 +16,13 @@ namespace Experimental
         private bool isFiring;
         private bool isMoving;
 
+        private bool isReload;
+
+        public bool IsReload
+        {
+            get => isReload;
+        }
+
         void Start()
         {
             originalPos = transform.localPosition;
@@ -21,36 +30,7 @@ namespace Experimental
 
         void Update()
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                isFiring = true;
-                StartCoroutine(ContinuousShake());
-            }
-            else if (Input.GetMouseButtonUp(0))
-            {
-                isFiring = false;
-            }
-
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                isMoving = true;
-                StartCoroutine(ContinuousMoveShake());
-            }
-            else if (Input.GetKeyUp(KeyCode.W))
-            {
-                isMoving = false;
-            }
-            
             transform.localPosition = Vector3.Lerp(transform.localPosition, targetPos, Time.deltaTime * interpolationSpeed);
-        }
-
-        IEnumerator ContinuousShake()
-        {
-            while (isFiring)
-            {
-                yield return StartCoroutine(ApplyShake());
-                yield return new WaitForSeconds(shakeDuration);
-            }
         }
 
         IEnumerator ApplyShake()
@@ -78,6 +58,8 @@ namespace Experimental
         
         IEnumerator ContinuousMoveShake()
         {
+            if(isFiring || isReload) yield break;
+            
             float elapsedTime = 0f;
             Vector3 localTargetPos = Vector3.zero;
             
@@ -94,7 +76,35 @@ namespace Experimental
                 yield return null;
             }
             
-            this.targetPos = originalPos;
+            targetPos = originalPos;
+        }
+
+        IEnumerator StartReload(float reloadTime, Func<bool> callback)
+        {
+            isReload = true;
+            targetPos += -transform.up * 0.4f + transform.right * 0.1f;
+            yield return new WaitForSeconds(reloadTime);
+            targetPos = originalPos;
+            isReload = false;
+
+            callback.Invoke();
+        }
+
+        public void UpdateIsMove(bool isMove)
+        {
+            isMoving = isMove;
+            if(isMoving)
+                StartCoroutine(ContinuousMoveShake());
+        }
+
+        public void DoReload(float reloadTime, Func<bool> callback)
+        {
+            StartCoroutine(StartReload(reloadTime, callback));
+        }
+
+        public void DoShoot()
+        {
+            StartCoroutine(ApplyShake());
         }
     }
 }

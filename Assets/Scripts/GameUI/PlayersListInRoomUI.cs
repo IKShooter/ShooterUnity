@@ -12,10 +12,10 @@ namespace GameUI
         public void UpdateList(List<PlayerModel> players)
         {
             // Remove old items
-            foreach (var listItem in playersItemsContainer.GetComponentsInChildren<RoomsListItem>())
+            foreach (Transform listItemTransform in playersItemsContainer.transform)
             {
-                if(listItem != exampleItem)
-                    Destroy(listItem.gameObject);
+                if(listItemTransform.gameObject != exampleItem)
+                    Destroy(listItemTransform.gameObject);
             }
             
             // Add new items

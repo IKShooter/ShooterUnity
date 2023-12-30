@@ -1,5 +1,7 @@
 ﻿using System;
 using DitzelGames.FastIK;
+using Experimental;
+using JetBrains.Annotations;
 using Network.Models;
 using UnityEngine;
 
@@ -7,6 +9,7 @@ public class WeaponPoint : MonoBehaviour
 {
     private Weapon activeWeapon;
     private GameObject activeWeaponObject;
+    [CanBeNull] private WeaponAnimIK _weaponAnimIK;
 
     [SerializeField] private GameObject leftHand;
     [SerializeField] private GameObject rightHand;
@@ -92,10 +95,32 @@ public class WeaponPoint : MonoBehaviour
         float zF = (bZ - aZ);
 
         activeWeaponObject.transform.localPosition = new Vector3(xF, yF, zF);
+        
+        _weaponAnimIK = activeWeaponObject.AddComponent<WeaponAnimIK>();
     }
 
     public GameObject GetWeaponGameObject()
     {
         return activeWeaponObject;
+    }
+
+    public void DoShoot()
+    {
+        _weaponAnimIK?.DoShoot();
+    }
+
+    public void DoReload(Func<bool> callback)
+    {
+        _weaponAnimIK?.DoReload(activeWeapon.ReloadTime, callback);
+    }
+
+    public void UpdateIsMove(bool isMoving)
+    {
+        _weaponAnimIK?.UpdateIsMove(isMoving);
+    }
+
+    public WeaponAnimIK GetWeaponAnimIK()
+    {
+        return _weaponAnimIK;
     }
 }

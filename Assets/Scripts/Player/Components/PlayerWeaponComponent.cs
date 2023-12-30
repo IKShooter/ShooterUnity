@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Network;
 using Network.Models;
@@ -16,6 +17,8 @@ namespace Player.Components
 
         private WeaponPoint _weaponPoint;
 
+        private bool isShoot;
+
         public PlayerWeaponComponent(PlayerController controller)
         {
             _controller = controller;
@@ -25,10 +28,28 @@ namespace Player.Components
         public void Update()
         {
             if (Input.GetKeyDown(KeyCode.R))
-                ReloadWeapon();
-            
-            if(Input.GetKeyDown(KeyCode.Mouse0))
-                Shoot();
+            {
+                isShoot = false;
+                _weaponPoint.DoReload(() =>
+                {
+                    ReloadWeapon();
+                    return false;
+                });
+            }
+
+            if (Input.GetKeyDown(KeyCode.Mouse0) && currentWeapon.Ammo > 0)
+            {
+                if (!_weaponPoint.GetWeaponAnimIK().IsReload)
+                {
+                    isShoot = true;
+                    _controller.StartCoroutine(StartShootCoroutine());
+                }
+            } else if (Input.GetKeyUp(KeyCode.Mouse0))
+            {
+                isShoot = false;
+            }
+
+            _weaponPoint.UpdateIsMove(PlayerController.Instance.MovementComponent.IsMoving);
             
             if (Input.GetKeyDown(KeyCode.Alpha1))
                 SwitchWeapon(1);
@@ -46,6 +67,33 @@ namespace Player.Components
                 SwitchWeapon(7);
         }
 
+        private IEnumerator StartShootCoroutine()
+        {
+            while (isShoot)
+            {
+                if (currentWeapon.Ammo <= 0)
+                {
+                    isShoot = false;
+                    yield break;
+                }
+                
+                _weaponPoint.DoShoot();
+                Shoot();
+
+                switch (currentWeapon.Type)
+                {
+                    case WeaponType.Minigun:
+                    case WeaponType.AssaultRifle:
+                        yield return new WaitForSeconds(1f / currentWeapon.FireRate);
+                        break;
+                    
+                    default:
+                        isShoot = false;
+                        yield break;
+                }
+            }
+        }
+        
         private void Shoot()
         {
             GameObject weaponGameObject = _weaponPoint.GetWeaponGameObject();
