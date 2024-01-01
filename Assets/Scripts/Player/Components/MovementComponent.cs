@@ -18,6 +18,7 @@ namespace Player.Components
         private readonly GameObject _body;
 
         private bool _isMoving;
+        private bool _isCrouching;
 
         public bool IsMoving
         {
@@ -74,18 +75,22 @@ namespace Player.Components
             {
                 StopCrouch();
             }
+            
+            // Prevent stucking in crouch
+            if (_isCrouching && !Input.GetKey(KeyCode.LeftControl))
+                StopCrouch();
         }
         
         void StartCrouch()
         {
-            //_originalHeight = _characterController.height; // Store the original height
-    
             // Reduce the height of the character controller
             _characterController.height = _crouchHeight;
 
             // Adjust the speed while crouching
             _walkingSpeed *= _crouchSpeedMultiplier;
             _runningSpeed *= _crouchSpeedMultiplier;
+
+            _isCrouching = true;
         }
 
         void StopCrouch()
@@ -96,6 +101,8 @@ namespace Player.Components
             // Reset the speed to normal values
             _walkingSpeed /= _crouchSpeedMultiplier;
             _runningSpeed /= _crouchSpeedMultiplier;
+
+            _isCrouching = false;
         }
     }
 }
