@@ -104,6 +104,8 @@ public class InGameUI : MonoBehaviour
     {
         Debug.Log("RESPAWN!");
         
+        PlayerController.Instance.NetworkSyncComponent.SetIsAlive(true);
+        
         PlayerController.Instance.GetCharacterController().enabled = false;
         Transform transform = PlayerController.Instance.gameObject.transform;
         transform.position = pos;
