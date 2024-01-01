@@ -47,7 +47,7 @@ namespace Player.Components
             _isMoving = horizontalMovement + verticalMovement != 0;
 
             // Apply gravity
-            _verticalVelocity += (Physics.gravity.y / 3.5f) * Time.deltaTime;
+            _verticalVelocity += (Physics.gravity.y / 1.5f) * Time.deltaTime;
 
             // Jump
             if (Input.GetButtonDown("Jump") && isGrounded)
