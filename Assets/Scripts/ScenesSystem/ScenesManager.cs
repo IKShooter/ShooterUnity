@@ -19,25 +19,24 @@ namespace ScenesSystem
         private string _lastLevelName = null;
         private Vector3 _lastPosition;
 
-        public ScenesManager(Vector3 lastPosition)
+        public ScenesManager()
         {
-            _lastPosition = lastPosition;
             Instance = this;
         }
     
-        private string GetLevelPath(string levelName)
+        private string GetLevelPath(string name)
         {
-            return "Scenes/Maps/" + levelName;
+            return "Scenes/Maps/" + name;
         }
 
-        public void LoadLevel(string levelName)
+        public void LoadLevel(string name)
         {
-            this.levelName = levelName;
+            levelName = name;
 
             if (_lastLevelName != null && SceneManager.GetSceneByName(_lastLevelName).isLoaded)
                 SceneManager.UnloadScene(_lastLevelName);
         
-            SceneManager.LoadScene(GetLevelPath(levelName), LoadSceneMode.Additive);
+            SceneManager.LoadScene(GetLevelPath(name), LoadSceneMode.Additive);
 
             StartCoroutine(TeleportPlayerToSpawnPoint());
         }

@@ -27,12 +27,8 @@ namespace Player.Components
         public MovementComponent(CharacterController characterController, GameObject body)
         {
             _characterController = characterController;
-            _body = body;
-        }
-
-        private void Start()
-        {
             _originalHeight = _characterController.height;
+            _body = body;
         }
         
         public void Update()
@@ -51,7 +47,7 @@ namespace Player.Components
             _isMoving = horizontalMovement + verticalMovement != 0;
 
             // Apply gravity
-            _verticalVelocity += Physics.gravity.y * Time.deltaTime;
+            _verticalVelocity += (Physics.gravity.y / 3.5f) * Time.deltaTime;
 
             // Jump
             if (Input.GetButtonDown("Jump") && isGrounded)
