@@ -36,7 +36,7 @@ namespace Player.Components
 
             if (Input.GetKeyDown(KeyCode.Mouse0) && (_currentWeapon.Ammo > 0 || _currentWeapon.Type == WeaponType.Melee))
             {
-                if (!_weaponPoint.GetWeaponAnimIK().IsReload)
+                if (!_weaponPoint.GetWeaponAnimIK().IsReload && !_isShoot)
                 {
                     _isShoot = true;
                     _controller.StartCoroutine(StartShootCoroutine());
