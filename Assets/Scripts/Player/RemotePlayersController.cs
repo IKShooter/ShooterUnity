@@ -175,9 +175,22 @@ namespace Player
                 remotePlayer.GameObject.SetActive(!remotePlayer.IsDead);
                 if(remotePlayer.IsDead) // Skip player update is dead
                     continue;
+
+                var distance = Vector3.Distance(remotePlayer.GameObject.transform.position,
+                    remotePlayer.Model.Position);
+
+                // Interpolate only if little distance
+                if (distance > 3f)
+                {
+                    remotePlayer.GameObject.transform.position = remotePlayer.Model.Position;
+                    remotePlayer.GameObject.transform.rotation = Quaternion.Euler(0f, remotePlayer.Model.RotationY, 0f);
+                }
+                else
+                {
+                    remotePlayer.GameObject.transform.position = Vector3.Lerp(remotePlayer.GameObject.transform.position, remotePlayer.Model.Position, Time.deltaTime*_interpolationSpeed);
+                    remotePlayer.GameObject.transform.rotation = Quaternion.Slerp(remotePlayer.GameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer.Model.RotationY, 0f), Time.deltaTime*_interpolationSpeed);
+                }
                 
-                remotePlayer.GameObject.transform.position = Vector3.Lerp(remotePlayer.GameObject.transform.position, remotePlayer.Model.Position, Time.deltaTime*_interpolationSpeed);
-                remotePlayer.GameObject.transform.rotation = Quaternion.Slerp(remotePlayer.GameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer.Model.RotationY, 0f), Time.deltaTime*_interpolationSpeed);
                 var rotation = remotePlayer.CameraJoin.transform.rotation;
                 rotation = Quaternion.Slerp(
                     rotation, 
