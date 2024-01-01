@@ -9,10 +9,16 @@ public class DmgNumber : MonoBehaviour
 {
     private Vector3? moveTarget;
 
-    public void StartAnim(int value)
+    private void Start()
+    {
+        UpdateRotation();
+    }
+
+    public void StartAnim(int value, Color color)
     {
         moveTarget = transform.position;
-        
+
+        GetComponent<TextMesh>().color = color;
         GetComponent<TextMesh>().text = value.ToString();
         StartCoroutine(AnimCoroutine());
     }
@@ -35,12 +41,17 @@ public class DmgNumber : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void Update()
+    private void UpdateRotation()
     {
         // Autorotate to camera
         GameObject go = PlayerController.Instance.GetMainCamera().gameObject;
         Vector3 heading = go.transform.position - transform.position;
         transform.LookAt(transform.position - heading);
+    }
+
+    void Update()
+    {
+        UpdateRotation();
         
         if(moveTarget != null)
             transform.position = Vector3.Lerp(transform.position, moveTarget.Value, Time.deltaTime * 0.4f);

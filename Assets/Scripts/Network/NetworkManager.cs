@@ -13,6 +13,8 @@ public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance;
 
+    private NetworkPacketsBufferizer _networkPacketsBufferizer;
+
     // private bool _isConnected;
     private NetManager _netManager;
     public NetPacketProcessor _netPacketProcessor;
@@ -35,6 +37,8 @@ public class NetworkManager : MonoBehaviour
         _netPacketProcessor = new NetPacketProcessor();
         _writer = new NetDataWriter();
 
+        _networkPacketsBufferizer = new NetworkPacketsBufferizer(this);
+        
         NetPacketProcessor netPP = _netPacketProcessor;
         
         //request model
@@ -164,13 +168,25 @@ public class NetworkManager : MonoBehaviour
         
         TryConnect();
     }
-    
+
+    private float lastTickTime;
     private void Update()
     {
         if(_netManager.IsRunning)
         {
             _netManager.PollEvents();
+
+            if (Time.time - lastTickTime > 1f / GameConstants.MaxTps)
+            {
+                Tick();
+                lastTickTime = Time.time;
+            }
         }
+    }
+
+    private void Tick()
+    {
+        _networkPacketsBufferizer.Tick();
     }
 
     private void OnApplicationQuit()
@@ -201,27 +217,35 @@ public class NetworkManager : MonoBehaviour
 
     public void TryAuth(string nickName)
     {
-        _writer.Reset();
         RequestPlayerAuthModel model = new RequestPlayerAuthModel
         {
             Nickname = nickName,
             VersionCode = GameConstants.VersionCode
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
+    }
+
+    public void SendModel<T>(ref T packet, bool isReliableOrdered = true) where T : Packet
+    {
+        _writer.Reset();
+        _writer.Put(packet.Hash);
+        packet.NetSerializable.Serialize(_writer);
+        _serverPeer.Send(_writer, isReliableOrdered ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+    }
+
+    public void PlanToSendModel<T>(ref T model, bool isHighPriority = false) where T : INetSerializable
+    {
+        _networkPacketsBufferizer.Add(model, isHighPriority);
     }
 
     public void LoadRoomsList()
     {
-        _writer.Reset();
         RequestRoomsListModel model = new RequestRoomsListModel();
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void TryCreateRoom(string name, int maxPlayers, string sceneName, string gameMode)
     {
-        _writer.Reset();
         RequestCreateRoomAndJoinModel model = new RequestCreateRoomAndJoinModel()
         {
             NameRoom = name,
@@ -229,19 +253,16 @@ public class NetworkManager : MonoBehaviour
             MaxPlayers = (byte)maxPlayers,
             SceneName = sceneName
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void TryJoinRoom(string roomName)
     {
-        _writer.Reset();
         RequestJoinRoomModel model = new RequestJoinRoomModel()
         {
             NameRoom = roomName,
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void LeaveRoom()
@@ -249,84 +270,66 @@ public class NetworkManager : MonoBehaviour
         currentRoom = null;
         EventsManager<RoomLeaveEvent>.Trigger?.Invoke();
         
-        _writer.Reset();
         RequestLeaveRoomModel model = new RequestLeaveRoomModel();
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void RequestAccessInRoom()
     {
-        _writer.Reset();
         RequestRoomAccessModel model = new RequestRoomAccessModel();
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void TrySendMessage(string text, TypeMessage type)
     {
-        _writer.Reset();
         RequestSendRoomMessageModel model = new RequestSendRoomMessageModel()
         {
             Text = text,
             Type = type
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void UpdatePlayer(Vector3 transformPosition, float verticalRotation, float horizontalRotation)
     {
-        _writer.Reset();
         RequestUpdatePlayerInRoom model = new RequestUpdatePlayerInRoom()
         {
             Position = transformPosition,
             RotationY = verticalRotation,
             RotationCameraX = horizontalRotation
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.Unreliable);
+        PlanToSendModel(ref model, isHighPriority: true);
     }
 
     public void TrySwitchWeapon(short slotId)
     {
-        _writer.Reset();
         RequestSwitchWeaponModel model = new RequestSwitchWeaponModel()
         {
             SlotId = slotId
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void TryReloadWeapon()
     {
-        _writer.Reset();
         RequestReload model = new RequestReload();
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void TryShoot(Vector3 hitPos, bool isHit, int  targetPlayerId)
     {
-        _writer.Reset();
         RequestShootModel model = new RequestShootModel()
         {
             IsHit = isHit,
             PosTo = hitPos,
             TargetPlayerId = targetPlayerId
         };
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
+        PlanToSendModel(ref model);
     }
 
     public void Respawn()
     {
-        _writer.Reset();
         RequestRespawn model = new RequestRespawn();
-        _netPacketProcessor.WriteNetSerializable(_writer, ref model);
-        _serverPeer.Send(_writer, DeliveryMethod.ReliableOrdered);
-        
-        Debug.Log("SENDED RESPAWN!!!");
+        PlanToSendModel(ref model);
     }
 }

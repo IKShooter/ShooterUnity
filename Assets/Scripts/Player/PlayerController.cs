@@ -52,6 +52,16 @@ namespace Player
             NetworkSyncComponent.Update();
             PlayerWeaponComponent.Update();
         }
+
+        public void SetEnabled(bool isEnabled)
+        {
+            GetCharacterController().enabled = isEnabled;
+        }
+
+        public bool IsEnabled()
+        {
+            return GetCharacterController().enabled;
+        }
         
         public bool IsGrounded()
         {

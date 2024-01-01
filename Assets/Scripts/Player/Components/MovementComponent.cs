@@ -29,6 +29,11 @@ namespace Player.Components
             _characterController = characterController;
             _body = body;
         }
+
+        private void Start()
+        {
+            _originalHeight = _characterController.height;
+        }
         
         public void Update()
         {
@@ -77,7 +82,7 @@ namespace Player.Components
         
         void StartCrouch()
         {
-            _originalHeight = _characterController.height; // Store the original height
+            //_originalHeight = _characterController.height; // Store the original height
     
             // Reduce the height of the character controller
             _characterController.height = _crouchHeight;

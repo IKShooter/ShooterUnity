@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Events;
+using Network.Enums;
 using Network.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -47,8 +48,20 @@ namespace Player
                 {
                     if (remotePlayer._model.Id == model.PlayerHitedId)
                     {
-                        // TODO: Process dmg type
-                        remotePlayer._gameObject.GetComponentInChildren<DmgNumberEmitter>().SpawnNumber(model.Damage);
+                        Color color = Color.magenta;
+                        switch (model.DamageType)
+                        {
+                            case DamageType.Standart:
+                                color = Color.white;
+                                break;
+                            case DamageType.Critical:
+                                color = Color.red;
+                                break;
+                            case DamageType.Headshot:
+                                color = Color.yellow;
+                                break;
+                        }
+                        remotePlayer._gameObject.GetComponentInChildren<DmgNumberEmitter>().SpawnNumber(model.Damage, color);
                         break;
                     }
                 }
