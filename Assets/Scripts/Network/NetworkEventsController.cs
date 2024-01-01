@@ -26,7 +26,7 @@ namespace Network
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            _networkManager._netPacketProcessor.ReadAllPackets(reader, peer);
+            _networkManager.NetPacketProcessor.ReadAllPackets(reader, peer);
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) { }

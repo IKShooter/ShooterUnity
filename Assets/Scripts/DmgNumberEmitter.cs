@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DmgNumberEmitter : MonoBehaviour
@@ -7,7 +5,8 @@ public class DmgNumberEmitter : MonoBehaviour
     public void SpawnNumber(int value, Color color)
     {
         GameObject asset = Resources.Load<GameObject>("Prefabs/DamageNumber");
-        GameObject number = Instantiate(asset, transform.position, transform.rotation);
+        var transform1 = transform;
+        GameObject number = Instantiate(asset, transform1.position, transform1.rotation);
         number.GetComponent<DmgNumber>().StartAnim(value, color);
     }
 }

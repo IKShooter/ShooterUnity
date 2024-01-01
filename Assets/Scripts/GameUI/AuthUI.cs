@@ -1,6 +1,7 @@
 ﻿using System;
 using Events;
 using LiteNetLib;
+using Network;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;

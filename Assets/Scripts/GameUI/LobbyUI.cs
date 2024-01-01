@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Events;
+using Network;
 using Network.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;

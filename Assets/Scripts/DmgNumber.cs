@@ -1,13 +1,11 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using Player;
 using UnityEngine;
 using Random = System.Random;
 
 public class DmgNumber : MonoBehaviour
 {
-    private Vector3? moveTarget;
+    private Vector3? _moveTarget;
 
     private void Start()
     {
@@ -16,7 +14,7 @@ public class DmgNumber : MonoBehaviour
 
     public void StartAnim(int value, Color color)
     {
-        moveTarget = transform.position;
+        _moveTarget = transform.position;
 
         GetComponent<TextMesh>().color = color;
         GetComponent<TextMesh>().text = value.ToString();
@@ -33,10 +31,15 @@ public class DmgNumber : MonoBehaviour
     private IEnumerator AnimCoroutine()
     {
         float offsetA = (float)GetRandomNumberInRange(-2.5, 2.5);
+
+        var transform1 = transform;
+        var position = transform1.position;
+        var up = transform1.up;
+        var right = transform1.right;
         
-        moveTarget = transform.position + transform.up * 5.0f + transform.right * offsetA;
+        _moveTarget = position + up * 5.0f + right * offsetA;
         yield return new WaitForSeconds(2f);
-        moveTarget = transform.position + -transform.up * 3.5f + transform.right * offsetA;
+        _moveTarget = position + -up * 3.5f + right * offsetA;
         yield return new WaitForSeconds(2f);
         Destroy(gameObject);
     }
@@ -45,15 +48,16 @@ public class DmgNumber : MonoBehaviour
     {
         // Autorotate to camera
         GameObject go = PlayerController.Instance.GetMainCamera().gameObject;
-        Vector3 heading = go.transform.position - transform.position;
-        transform.LookAt(transform.position - heading);
+        var position = transform.position;
+        Vector3 heading = go.transform.position - position;
+        transform.LookAt(position - heading);
     }
 
     void Update()
     {
         UpdateRotation();
         
-        if(moveTarget != null)
-            transform.position = Vector3.Lerp(transform.position, moveTarget.Value, Time.deltaTime * 0.4f);
+        if(_moveTarget != null)
+            transform.position = Vector3.Lerp(transform.position, _moveTarget.Value, Time.deltaTime * 0.4f);
     }
 }

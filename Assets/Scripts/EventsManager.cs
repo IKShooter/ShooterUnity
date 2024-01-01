@@ -1,6 +1,6 @@
 ﻿using System;
 
-public static class EventsManager<T> where T : System.Delegate
+public static class EventsManager<T> where T : Delegate
 {
     private static T _handle;
  

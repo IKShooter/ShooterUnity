@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Events;
+using Network;
 using Network.Enums;
 using Network.Models;
 using Network.Models.Player;
@@ -9,8 +10,8 @@ namespace Player
 {
     public class RemotePlayer
     {
-        public PlayerModel Model;
-        public GameObject GameObject;
+        public readonly PlayerModel Model;
+        public readonly GameObject GameObject;
         public RemoteCameraJoin CameraJoin;
         public WeaponPoint WeaponPoint;
         public bool IsDead;
@@ -28,14 +29,14 @@ namespace Player
 
         [SerializeField] private GameObject playersParentGameObject;
         
-        private float _interpolationSpeed = 5.0f;
+        private readonly float _interpolationSpeed = 5.0f;
         
         public RemotePlayersController()
         {
             instance = this;
         }
 
-        private List<RemotePlayer> _remotePlayers = new List<RemotePlayer>();
+        private readonly List<RemotePlayer> _remotePlayers = new List<RemotePlayer>();
 
         private void Start()
         {
@@ -113,7 +114,7 @@ namespace Player
                         remotePlayer.GameObject.GetComponentInChildren<TextMesh>().gameObject.SetActive(false);
 
                         // Assign player data
-                        newPlayerObject.AddComponent<RemotePlayerComponent>().playerModel = model;
+                        newPlayerObject.AddComponent<RemotePlayerComponent>().PlayerModel = model;
 
                         remotePlayer.CameraJoin = newPlayerObject.GetComponentInChildren<RemoteCameraJoin>();
 
@@ -140,7 +141,6 @@ namespace Player
                     {
                         EventsManager<RemotePlayerLeaveEvent>.Trigger?.Invoke(remotePlayer.Model);
                         Destroy(remotePlayer.GameObject);
-                        // Debug.Log($"CURVA, DESTROYED!!! {remotePlayer._model.Nickname}");
                         _remotePlayers.Remove(remotePlayer);
                         break;
                     }

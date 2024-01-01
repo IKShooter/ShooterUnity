@@ -33,9 +33,10 @@ namespace Player
             _playerWeaponCamera = GetComponentsInChildren<Camera>()[1];
         
             // Init components
-            MouseControlComponent = new MouseControlComponent(GetMainCamera(), gameObject);
-            MovementComponent = new MovementComponent(_characterController, gameObject);
-            NetworkSyncComponent = new NetworkSyncComponent(gameObject, GetMainCamera());
+            GameObject o;
+            MouseControlComponent = new MouseControlComponent(GetMainCamera(), (o = gameObject));
+            MovementComponent = new MovementComponent(_characterController, o);
+            NetworkSyncComponent = new NetworkSyncComponent(o, GetMainCamera());
             PlayerWeaponComponent = new PlayerWeaponComponent(this);
             
             Cursor.lockState = CursorLockMode.Locked;

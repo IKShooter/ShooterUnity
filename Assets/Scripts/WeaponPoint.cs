@@ -7,8 +7,8 @@ using UnityEngine;
 
 public class WeaponPoint : MonoBehaviour
 {
-    private Weapon activeWeapon;
-    private GameObject activeWeaponObject;
+    private Weapon _activeWeapon;
+    private GameObject _activeWeaponObject;
     [CanBeNull] private WeaponAnimIK _weaponAnimIK;
 
     [SerializeField] private GameObject leftHand;
@@ -16,8 +16,8 @@ public class WeaponPoint : MonoBehaviour
         
     private void RemoveActiveWeapon()
     {
-        Destroy(activeWeaponObject);
-        activeWeaponObject = null;
+        Destroy(_activeWeaponObject);
+        _activeWeaponObject = null;
         
         leftHand.GetComponent<FastIKFabric>().Target = null;
         rightHand.GetComponent<FastIKFabric>().Target = null;
@@ -25,48 +25,48 @@ public class WeaponPoint : MonoBehaviour
 
     public void SetActiveWeapon(RemotePlayerWeaponModel weaponModel)
     {
-        if(activeWeapon && activeWeapon.Id == weaponModel.Id)
+        if(_activeWeapon && _activeWeapon.id == weaponModel.Id)
             return;
         
         RemoveActiveWeapon();
         
-        Destroy(activeWeaponObject);
+        Destroy(_activeWeaponObject);
 
-        activeWeaponObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Weapons/{weaponModel.Id}"));
-        activeWeapon = activeWeaponObject.AddComponent<Weapon>();
+        _activeWeaponObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Weapons/{weaponModel.Id}"));
+        _activeWeapon = _activeWeaponObject.AddComponent<Weapon>();
 
-        activeWeapon.SetDataFromRemoteModel(weaponModel);
+        _activeWeapon.SetDataFromRemoteModel(weaponModel);
         
         UpdateWeapon(false);
     }
 
     public void SetActiveWeapon(LocalPlayerWeaponModel weaponModel)
     {
-        if (activeWeapon && activeWeapon.Id == weaponModel.Id)
+        if (_activeWeapon && _activeWeapon.id == weaponModel.Id)
             return;
         
         RemoveActiveWeapon();
         
-        Destroy(activeWeaponObject);
+        Destroy(_activeWeaponObject);
 
-        activeWeaponObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Weapons/{weaponModel.Id}"));
-        activeWeapon = activeWeaponObject.AddComponent<Weapon>();
+        _activeWeaponObject = Instantiate(Resources.Load<GameObject>($"Prefabs/Weapons/{weaponModel.Id}"));
+        _activeWeapon = _activeWeaponObject.AddComponent<Weapon>();
 
-        activeWeapon.SetDataFromLocalModel(weaponModel);
+        _activeWeapon.SetDataFromLocalModel(weaponModel);
 
         UpdateWeapon(true);
     }
     
     private void UpdateWeapon(bool isSecondLayer) 
     {
-        activeWeaponObject.transform.SetParent(transform, false);
-        activeWeaponObject.transform.localPosition = Vector3.zero;
-        activeWeaponObject.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
+        _activeWeaponObject.transform.SetParent(transform, false);
+        _activeWeaponObject.transform.localPosition = Vector3.zero;
+        _activeWeaponObject.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
 
         Transform leftHandTarget = null;
         Transform rightHandTarget = null;
         Transform pinPoint = null;
-        foreach (Transform tr in activeWeaponObject.transform)
+        foreach (Transform tr in _activeWeaponObject.transform)
         {
             if(!isSecondLayer)
                 tr.gameObject.layer = LayerMask.NameToLayer("Default");
@@ -81,24 +81,33 @@ public class WeaponPoint : MonoBehaviour
         
         leftHand.GetComponent<FastIKFabric>().Target = leftHandTarget;
         rightHand.GetComponent<FastIKFabric>().Target = rightHandTarget;
-        
-        pinPoint.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
 
-        // Math new weapon position
-        float aX = pinPoint.position.x;
-        float aY = pinPoint.position.y;
-        float aZ = pinPoint.position.z;
+        if (pinPoint != null)
+        {
+            pinPoint.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
 
-        float bX = transform.position.x;
-        float bY = transform.position.y;
-        float bZ = transform.position.z;
+            // Math new weapon position
+            if (pinPoint != null)
+            {
+                var position = pinPoint.position;
+                float aX = position.x;
+                float aY = position.y;
+                float aZ = position.z;
 
-        float xF = (aX - bX);
-        float yF = (aY - bY);
-        float zF = (bZ - aZ);
+                var transform1 = transform;
+                var position1 = transform1.position;
+                float bX = position1.x;
+                float bY = position1.y;
+                float bZ = position1.z;
 
-        activeWeaponObject.transform.localPosition = new Vector3(xF, yF, zF);
-        
+                float xF = (aX - bX);
+                float yF = (aY - bY);
+                float zF = (bZ - aZ);
+
+                _activeWeaponObject.transform.localPosition = new Vector3(xF, yF, zF);
+            }
+        }
+
         // Add weapon anim to this weapon point
         _weaponAnimIK = gameObject.GetComponent<WeaponAnimIK>();
         if(_weaponAnimIK == null)
@@ -107,7 +116,7 @@ public class WeaponPoint : MonoBehaviour
 
     public GameObject GetWeaponGameObject()
     {
-        return activeWeaponObject;
+        return _activeWeaponObject;
     }
 
     public void DoShoot()
@@ -117,7 +126,7 @@ public class WeaponPoint : MonoBehaviour
 
     public void DoReload(Func<bool> callback)
     {
-        _weaponAnimIK?.DoReload(activeWeapon.ReloadTime, callback);
+        _weaponAnimIK?.DoReload(_activeWeapon.reloadTime, callback);
     }
 
     public void UpdateIsMove(bool isMoving)

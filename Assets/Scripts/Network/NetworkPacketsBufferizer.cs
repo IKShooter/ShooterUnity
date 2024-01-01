@@ -10,8 +10,8 @@ namespace Network
     {
         private const int OneTickPacketLimit = 12;
     
-        private NetworkManager _networkManager;
-        private Queue<Packet> _packetsQueue;
+        private readonly NetworkManager _networkManager;
+        private readonly Queue<Packet> _packetsQueue;
     
         public NetworkPacketsBufferizer(NetworkManager networkManager)
         {

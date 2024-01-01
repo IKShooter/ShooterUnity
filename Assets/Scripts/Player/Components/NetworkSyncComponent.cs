@@ -1,13 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using Network;
+using UnityEngine;
 
 namespace Player.Components
 {
     public class NetworkSyncComponent : IControllerComponent
     {
-        private GameObject _playerBody;
-        private Camera _camera;
+        private readonly GameObject _playerBody;
+        private readonly Camera _camera;
         
         private float _lastNetworkUpdate;
+        
+        private Vector3 _lastPos;
+        private float _lastRotY;
 
         private bool _isAlive;
 
@@ -22,8 +27,6 @@ namespace Player.Components
             _camera = camera;
         }
         
-        private Vector3 lastPos;
-        private float lastRotY;
 
         public void SetIsAlive(bool isAlive)
         {
@@ -33,20 +36,23 @@ namespace Player.Components
         
         public void Update()
         {
-            if(_isAlive)
+            if (!_isAlive) return;
+            
             if (Time.time - _lastNetworkUpdate > 1f / GameConstants.PlayerSyncTps)
             {
                 Transform transform = _playerBody.transform;
 
-                if (lastPos != transform.position || lastRotY != transform.rotation.eulerAngles.y)
+                if (_lastPos != transform.position || Math.Abs(_lastRotY - transform.rotation.eulerAngles.y) > 0.1f)
                 {
+                    var position = transform.position;
+                    var rotation = transform.rotation;
                     NetworkManager.Instance.UpdatePlayer(
-                        transform.position, 
-                        transform.rotation.eulerAngles.y, 
+                        position, 
+                        rotation.eulerAngles.y, 
                         _camera.transform.rotation.eulerAngles.x
-                        );
-                    lastPos = transform.position;
-                    lastRotY = transform.rotation.eulerAngles.y;
+                    );
+                    _lastPos = position;
+                    _lastRotY = rotation.eulerAngles.y;
                 }
                 _lastNetworkUpdate = Time.time;
             }

@@ -1,5 +1,4 @@
-﻿using System;
-using Events;
+﻿using Events;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,18 +7,14 @@ public class GlobalErrorHandler : MonoBehaviour
 {
     private void Start()
     {
-        EventsManager<ErrorEvent>.Register((tag, error, isCritical) =>
+        EventsManager<ErrorEvent>.Register((errorTag, error, isCritical) =>
         {
-            Debug.Log($"ERROR from {tag}: {error}");
-            if (isCritical)
-            {
-                // TODO: Separated disconnect screen
-                ShowErrorDialog(tag, $"Critical error! Restart game for reconnect to server.\nReason: {error.Message}");
-            }
-            else
-            {
-                ShowErrorDialog(tag, error.Message);
-            }
+            Debug.Log($"ERROR from {errorTag}: {error}");
+            // TODO: Separated disconnect screen
+            ShowErrorDialog(errorTag,
+                isCritical
+                    ? $"Critical error! Restart game for reconnect to server.\nReason: {error.Message}"
+                    : error.Message);
         });
         
         DontDestroyOnLoad(this);
@@ -38,11 +33,11 @@ public class GlobalErrorHandler : MonoBehaviour
 
         // Find canvas
         GameObject canvasGameObject = null;
-        foreach (var gameObject in SceneManager.GetActiveScene().GetRootGameObjects())
+        foreach (var rootGameObject in SceneManager.GetActiveScene().GetRootGameObjects())
         {
-            if (gameObject.name.Contains("Canvas"))
+            if (rootGameObject.name.Contains("Canvas"))
             {
-                canvasGameObject = gameObject;
+                canvasGameObject = rootGameObject;
                 break;
             }
         }
@@ -56,13 +51,15 @@ public class GlobalErrorHandler : MonoBehaviour
         {
             Destroy(uiGameObject);
         });
-        
-        uiGameObject.transform.SetParent(canvasGameObject.transform);
-        
-        // Magic centering
-        RectTransform rectTransform = uiGameObject.GetComponent<RectTransform>();
-        rectTransform.SetParent(canvasGameObject.transform, false);
-        rectTransform.localPosition = Vector3.zero + new Vector3(0f, 0f, 1f);
 
+        if (canvasGameObject != null)
+        {
+            uiGameObject.transform.SetParent(canvasGameObject.transform);
+
+            // Magic centering
+            RectTransform rectTransform = uiGameObject.GetComponent<RectTransform>();
+            rectTransform.SetParent(canvasGameObject.transform, false);
+            rectTransform.localPosition = Vector3.zero + new Vector3(0f, 0f, 1f);
+        }
     }
 }

@@ -3,5 +3,5 @@ using UnityEngine;
 
 public class RemotePlayerComponent : MonoBehaviour
 {
-    public PlayerModel playerModel;
+    public PlayerModel PlayerModel;
 }
