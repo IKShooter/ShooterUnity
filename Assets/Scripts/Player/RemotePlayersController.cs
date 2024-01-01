@@ -1,42 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Events;
 using Network.Enums;
 using Network.Models;
 using Network.Models.Player;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace Player
 {
     public class RemotePlayer
     {
-        public PlayerModel _model;
-        public GameObject _gameObject;
-        public RemoteCameraJoin cameraJoin;
+        public PlayerModel Model;
+        public GameObject GameObject;
+        public RemoteCameraJoin CameraJoin;
         public WeaponPoint WeaponPoint;
-        public bool isDead;
+        public bool IsDead;
         
         public RemotePlayer(PlayerModel model, GameObject gameObject)
         {
-            _model = model;
-            _gameObject = gameObject;
+            Model = model;
+            GameObject = gameObject;
         }
     }
     
     public class RemotePlayersController : MonoBehaviour
     {
-        public RemotePlayersController Instance;
+        public RemotePlayersController instance;
 
         [SerializeField] private GameObject playersParentGameObject;
         
-        private float interpolationSpeed = 5.0f;
+        private float _interpolationSpeed = 5.0f;
         
         public RemotePlayersController()
         {
-            Instance = this;
+            instance = this;
         }
 
         private List<RemotePlayer> _remotePlayers = new List<RemotePlayer>();
@@ -61,7 +57,7 @@ namespace Player
         {
             foreach (var remotePlayer in _remotePlayers)
             {
-                if (remotePlayer._model.Id == model.PlayerHitedId)
+                if (remotePlayer.Model.Id == model.PlayerHitedId)
                 {
                     Color color = Color.magenta;
                     switch (model.DamageType)
@@ -76,7 +72,7 @@ namespace Player
                             color = Color.yellow;
                             break;
                     }
-                    remotePlayer._gameObject.GetComponentInChildren<DmgNumberEmitter>().SpawnNumber(model.Damage, color);
+                    remotePlayer.GameObject.GetComponentInChildren<DmgNumberEmitter>().SpawnNumber(model.Damage, color);
                     break;
                 }
             }
@@ -87,11 +83,10 @@ namespace Player
             // Is not full missed
             if(model.PosTo != Vector3.zero)
                 Utils.SpawnHitParticle(model.PosTo);
-                
-            if(model.IsHit)
-                Debug.Log($"SHOOTING! {model.PlayerShooter.Nickname}"); // TODO: to {model.TargetPlayer.Nickname}"
-            else
-                Debug.Log($"MISS SHOOT BY {model.PlayerShooter.Nickname}");
+
+            Debug.Log(model.IsHit
+                ? $"SHOOTING! {model.PlayerShooter.Nickname}"
+                : $"MISS SHOOT BY {model.PlayerShooter.Nickname}"); // TODO: to {model.TargetPlayer.Nickname}"
         }
 
         private void OnPlayersInRoomEvent(List<PlayerModel> models)
@@ -103,10 +98,10 @@ namespace Player
                     if(NetworkManager.Instance.GetCurrentPlayer().Id == model.Id)
                         continue;
                     
-                    RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == model.Id);
+                    RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl.Model.Id == model.Id);
                     if (remotePlayer == null)
                     {
-                        GameObject newPlayerObject = Instantiate(Resources.Load<GameObject>("Prefabs/EnemyPlayer"));
+                        GameObject newPlayerObject = Instantiate(Resources.Load<GameObject>("Prefabs/EnemyPlayer"), playersParentGameObject.transform, true);
                         
                         TextMesh nickNameText = newPlayerObject.GetComponentInChildren<TextMesh>();
                         nickNameText.text = model.Nickname;
@@ -115,27 +110,25 @@ namespace Player
                         _remotePlayers.Add(remotePlayer);
                         
                         // Disable nickname
-                        remotePlayer._gameObject.GetComponentInChildren<TextMesh>().gameObject.SetActive(false);
+                        remotePlayer.GameObject.GetComponentInChildren<TextMesh>().gameObject.SetActive(false);
 
                         // Assign player data
                         newPlayerObject.AddComponent<RemotePlayerComponent>().playerModel = model;
 
-                        remotePlayer.cameraJoin = newPlayerObject.GetComponentInChildren<RemoteCameraJoin>();
+                        remotePlayer.CameraJoin = newPlayerObject.GetComponentInChildren<RemoteCameraJoin>();
 
                         remotePlayer.WeaponPoint = newPlayerObject.GetComponentInChildren<WeaponPoint>();
-                        
-                        newPlayerObject.transform.SetParent(playersParentGameObject.transform);
 
-                        remotePlayer._gameObject.transform.position = remotePlayer._model.Position;
-                        remotePlayer._gameObject.transform.rotation = Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f);
+                        remotePlayer.GameObject.transform.position = remotePlayer.Model.Position;
+                        remotePlayer.GameObject.transform.rotation = Quaternion.Euler(0f, remotePlayer.Model.RotationY, 0f);
                         
                         Debug.Log($"Registered new player! {model.Id}");
                     }
                     else
                     {
-                        remotePlayer._model.RotationY = model.RotationY;
-                        remotePlayer._model.RotationCameraX = model.RotationCameraX;
-                        remotePlayer._model.Position = model.Position;
+                        remotePlayer.Model.RotationY = model.RotationY;
+                        remotePlayer.Model.RotationCameraX = model.RotationCameraX;
+                        remotePlayer.Model.Position = model.Position;
                     }
                 }
                 
@@ -143,10 +136,10 @@ namespace Player
                 foreach (RemotePlayer remotePlayer in _remotePlayers)
                 {
                     // Is leaved
-                    if (models.Find(model => model.Id == remotePlayer._model.Id) == null)
+                    if (models.Find(model => model.Id == remotePlayer.Model.Id) == null)
                     {
-                        EventsManager<RemotePlayerLeaveEvent>.Trigger?.Invoke(remotePlayer._model);
-                        Destroy(remotePlayer._gameObject);
+                        EventsManager<RemotePlayerLeaveEvent>.Trigger?.Invoke(remotePlayer.Model);
+                        Destroy(remotePlayer.GameObject);
                         // Debug.Log($"CURVA, DESTROYED!!! {remotePlayer._model.Nickname}");
                         _remotePlayers.Remove(remotePlayer);
                         break;
@@ -160,15 +153,15 @@ namespace Player
             {
                 // Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id} ({updatePlayerInRoom.Position.y})");
                 
-                RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == updatePlayerInRoom.Id);
+                RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl.Model.Id == updatePlayerInRoom.Id);
 
                 if (remotePlayer != null)
                 {
-                    remotePlayer._model.RotationY = updatePlayerInRoom.RotationY;
-                    remotePlayer._model.RotationCameraX = updatePlayerInRoom.RotationCameraX;
-                    remotePlayer._model.Position = updatePlayerInRoom.Position;
-                    remotePlayer._model.Ping = updatePlayerInRoom.Ping;
-                    remotePlayer.isDead = updatePlayerInRoom.IsDead;
+                    remotePlayer.Model.RotationY = updatePlayerInRoom.RotationY;
+                    remotePlayer.Model.RotationCameraX = updatePlayerInRoom.RotationCameraX;
+                    remotePlayer.Model.Position = updatePlayerInRoom.Position;
+                    remotePlayer.Model.Ping = updatePlayerInRoom.Ping;
+                    remotePlayer.IsDead = updatePlayerInRoom.IsDead;
                         
                     remotePlayer.WeaponPoint.SetActiveWeapon(updatePlayerInRoom.CurrentWeapon);
                 }
@@ -179,30 +172,33 @@ namespace Player
         {
             foreach (var remotePlayer in _remotePlayers)
             {
-                remotePlayer._gameObject.SetActive(!remotePlayer.isDead);
-                if(remotePlayer.isDead) // Skip player update is dead
+                remotePlayer.GameObject.SetActive(!remotePlayer.IsDead);
+                if(remotePlayer.IsDead) // Skip player update is dead
                     continue;
                 
-                remotePlayer._gameObject.transform.position = Vector3.Lerp(remotePlayer._gameObject.transform.position, remotePlayer._model.Position, Time.deltaTime*interpolationSpeed);
-                remotePlayer._gameObject.transform.rotation = Quaternion.Slerp(remotePlayer._gameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer._model.RotationY, 0f), Time.deltaTime*interpolationSpeed);
-                remotePlayer.cameraJoin.transform.rotation = Quaternion.Slerp(
-                    remotePlayer.cameraJoin.transform.rotation, 
+                remotePlayer.GameObject.transform.position = Vector3.Lerp(remotePlayer.GameObject.transform.position, remotePlayer.Model.Position, Time.deltaTime*_interpolationSpeed);
+                remotePlayer.GameObject.transform.rotation = Quaternion.Slerp(remotePlayer.GameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer.Model.RotationY, 0f), Time.deltaTime*_interpolationSpeed);
+                var rotation = remotePlayer.CameraJoin.transform.rotation;
+                rotation = Quaternion.Slerp(
+                    rotation, 
                     Quaternion.Euler(
-                        remotePlayer._model.RotationCameraX, 
-                        remotePlayer.cameraJoin.transform.rotation.y,
-                        remotePlayer.cameraJoin.transform.rotation.z
+                        remotePlayer.Model.RotationCameraX, 
+                        rotation.y,
+                        rotation.z
                     ),
-                Time.deltaTime*interpolationSpeed
+                Time.deltaTime*_interpolationSpeed
                 );
-                
+                remotePlayer.CameraJoin.transform.rotation = rotation;
+
                 // Rotate nick
-                TextMesh nickNameText = remotePlayer._gameObject.GetComponentInChildren<TextMesh>();
+                TextMesh nickNameText = remotePlayer.GameObject.GetComponentInChildren<TextMesh>();
                 if (nickNameText)
                 {
                     GameObject nickNameTextGameObject = nickNameText.gameObject;
                     GameObject go = PlayerController.Instance.GetMainCamera().gameObject;
-                    Vector3 heading = go.transform.position - nickNameTextGameObject.transform.position;
-                    nickNameTextGameObject.transform.LookAt(nickNameTextGameObject.transform.position - heading);
+                    var position = nickNameTextGameObject.transform.position;
+                    Vector3 heading = go.transform.position - position;
+                    nickNameTextGameObject.transform.LookAt(position - heading);
                 }
             }
         }
