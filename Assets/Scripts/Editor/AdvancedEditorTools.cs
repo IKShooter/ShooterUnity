@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using Quaternion = System.Numerics.Quaternion;
 
 namespace Editor
@@ -38,6 +40,32 @@ namespace Editor
         {
             public List<SpawnPoint> spawnPoints;
         }
+
+        [Serializable]
+        private class GeometryBox
+        {
+            public Vector3 pos;
+            public Vector3 size;
+            public Vector3 rot;
+
+            public GeometryBox(Vector3 pos, Vector3 size, Vector3 rot)
+            {
+                this.pos = pos;
+                this.size = size;
+                this.rot = rot;
+            }
+        }
+
+        [Serializable]
+        private class GeometryInfo
+        {
+            public List<GeometryBox> geometryBoxes;
+
+            public GeometryInfo(List<GeometryBox> geometryBoxes)
+            {
+                this.geometryBoxes = geometryBoxes;
+            }
+        }
         
         [MenuItem("Advanced/DumpSpawnPointsJson")]
         public static void DumpSpawnPointsJson()
@@ -53,6 +81,38 @@ namespace Editor
             
             string json = JsonUtility.ToJson(spawnPointsList, true);
             Debug.Log($"\n{json}\n");
-        }       
+        }
+
+        [MenuItem("Advanced/DumpLevelGeometry")]
+        public static void DumpLevelGeometry()
+        {
+            List<GeometryBox> boxes = new List<GeometryBox>();
+            
+            foreach (var obj in SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                DoGrabGeomRecursive(ref boxes, obj);
+            }
+            
+            string json = JsonUtility.ToJson(new GeometryInfo(boxes), true);
+            using(StreamWriter writetext = new StreamWriter("./levelGeometry.json"))
+            {
+                writetext.WriteLine(json);
+            }
+            //Debug.Log($"\n{json}\n");
+        }
+
+        private static void DoGrabGeomRecursive(ref List<GeometryBox> boxes, GameObject go)
+        {
+            BoxCollider collider = go.GetComponent<BoxCollider>();
+            if (collider != null && !collider.isTrigger)
+            {
+                boxes.Add(new GeometryBox(collider.bounds.center, collider.bounds.size, go.transform.rotation.eulerAngles));
+            }
+
+            foreach (Transform tr in go.transform)
+            {
+                DoGrabGeomRecursive(ref boxes, tr.gameObject);
+            }
+        }
     }
 }
