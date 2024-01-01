@@ -4,6 +4,7 @@ using System.Linq;
 using Events;
 using Network.Enums;
 using Network.Models;
+using Network.Models.Player;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -42,46 +43,60 @@ namespace Player
 
         private void Start()
         {
-            EventsManager<OtherDamageEvent>.Register(model =>
+            EventsManager<OtherDamageEvent>.Register(OnOtherDamageEvent);
+            EventsManager<PlayerShootEvent>.Register(OnPlayerShootEvent);
+            EventsManager<PlayersInRoomEvent>.Register(OnPlayersInRoomEvent);
+            EventsManager<UpdatePlayerInRoomEvent>.Register(OnUpdatePlayersInRoomEvent);
+        }
+        
+        private void OnDestroy()
+        {
+            EventsManager<OtherDamageEvent>.Unregister(OnOtherDamageEvent);
+            EventsManager<PlayerShootEvent>.Unregister(OnPlayerShootEvent);
+            EventsManager<PlayersInRoomEvent>.Unregister(OnPlayersInRoomEvent);
+            EventsManager<UpdatePlayerInRoomEvent>.Unregister(OnUpdatePlayersInRoomEvent);
+        }
+
+        private void OnOtherDamageEvent(DamageInfoModel model)
+        {
+            foreach (var remotePlayer in _remotePlayers)
             {
-                foreach (var remotePlayer in _remotePlayers)
+                if (remotePlayer._model.Id == model.PlayerHitedId)
                 {
-                    if (remotePlayer._model.Id == model.PlayerHitedId)
+                    Color color = Color.magenta;
+                    switch (model.DamageType)
                     {
-                        Color color = Color.magenta;
-                        switch (model.DamageType)
-                        {
-                            case DamageType.Standart:
-                                color = Color.white;
-                                break;
-                            case DamageType.Critical:
-                                color = Color.red;
-                                break;
-                            case DamageType.Headshot:
-                                color = Color.yellow;
-                                break;
-                        }
-                        remotePlayer._gameObject.GetComponentInChildren<DmgNumberEmitter>().SpawnNumber(model.Damage, color);
-                        break;
+                        case DamageType.Standart:
+                            color = Color.white;
+                            break;
+                        case DamageType.Critical:
+                            color = Color.red;
+                            break;
+                        case DamageType.Headshot:
+                            color = Color.yellow;
+                            break;
                     }
+                    remotePlayer._gameObject.GetComponentInChildren<DmgNumberEmitter>().SpawnNumber(model.Damage, color);
+                    break;
                 }
-            });
-            
-            EventsManager<PlayerShootEvent>.Register(model =>
-            {
-                // Is not full missed
-                if(model.PosTo != Vector3.zero)
-                    Utils.SpawnHitParticle(model.PosTo);
+            }
+        }
+        
+        private void OnPlayerShootEvent(ShootModel model)
+        {
+            // Is not full missed
+            if(model.PosTo != Vector3.zero)
+                Utils.SpawnHitParticle(model.PosTo);
                 
-                if(model.IsHit)
-                    Debug.Log($"SHOOTING! {model.PlayerShooter.Nickname}"); // TODO: to {model.TargetPlayer.Nickname}"
-                else
-                    Debug.Log($"MISS SHOOT BY {model.PlayerShooter.Nickname}");
-            });
-            
-            EventsManager<PlayersInRoomEvent>.Register((models =>
-            {
-                Debug.Log($"PlayersInRoomEvent {models.Count}");
+            if(model.IsHit)
+                Debug.Log($"SHOOTING! {model.PlayerShooter.Nickname}"); // TODO: to {model.TargetPlayer.Nickname}"
+            else
+                Debug.Log($"MISS SHOOT BY {model.PlayerShooter.Nickname}");
+        }
+
+        private void OnPlayersInRoomEvent(List<PlayerModel> models)
+        {
+            Debug.Log($"PlayersInRoomEvent {models.Count}");
                 
                 foreach (var model in models)
                 {
@@ -137,30 +152,28 @@ namespace Player
                         break;
                     }
                 }
-            }));
-            
-            EventsManager<UpdatePlayerInRoomEvent>.Register((model =>
-            {
-                foreach (var updatePlayerInRoom in model.updates)
-                {
-                    // Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id} ({updatePlayerInRoom.Position.y})");
-                
-                    RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == updatePlayerInRoom.Id);
-
-                    if (remotePlayer != null)
-                    {
-                        remotePlayer._model.RotationY = updatePlayerInRoom.RotationY;
-                        remotePlayer._model.RotationCameraX = updatePlayerInRoom.RotationCameraX;
-                        remotePlayer._model.Position = updatePlayerInRoom.Position;
-                        remotePlayer._model.Ping = updatePlayerInRoom.Ping;
-                        remotePlayer.isDead = updatePlayerInRoom.IsDead;
-                        
-                        remotePlayer.WeaponPoint.SetActiveWeapon(updatePlayerInRoom.CurrentWeapon);
-                    }
-                }
-            }));
         }
 
+        private void OnUpdatePlayersInRoomEvent(UpdatePlayersTickInRoom model)
+        {
+            foreach (var updatePlayerInRoom in model.updates)
+            {
+                // Debug.Log($"UpdatePlayerInRoomEvent for {updatePlayerInRoom.Id} ({updatePlayerInRoom.Position.y})");
+                
+                RemotePlayer remotePlayer = _remotePlayers.Find(pl => pl._model.Id == updatePlayerInRoom.Id);
+
+                if (remotePlayer != null)
+                {
+                    remotePlayer._model.RotationY = updatePlayerInRoom.RotationY;
+                    remotePlayer._model.RotationCameraX = updatePlayerInRoom.RotationCameraX;
+                    remotePlayer._model.Position = updatePlayerInRoom.Position;
+                    remotePlayer._model.Ping = updatePlayerInRoom.Ping;
+                    remotePlayer.isDead = updatePlayerInRoom.IsDead;
+                        
+                    remotePlayer.WeaponPoint.SetActiveWeapon(updatePlayerInRoom.CurrentWeapon);
+                }
+            }
+        }
         
         private void Update()
         {
