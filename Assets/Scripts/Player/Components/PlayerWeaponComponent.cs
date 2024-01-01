@@ -26,6 +26,7 @@ namespace Player.Components
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
+                // TODO: Prevent reloading, if can't (no reserv or not needed)
                 _isShoot = false;
                 _weaponPoint.DoReload(() =>
                 {
