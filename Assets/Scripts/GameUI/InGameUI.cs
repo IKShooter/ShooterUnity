@@ -12,10 +12,15 @@ using Server.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Cursor = UnityEngine.Cursor;
 
 public class InGameUI : MonoBehaviour
 {
-    [SerializeField] private Text chatText;
+    [SerializeField] private GameObject chatLayout;
+    [SerializeField] private GameObject chatContainer;
+    [SerializeField] private ChatItem chatItemExample;
+    
     [SerializeField] private InputField chatField;
     [SerializeField] private Text chatFieldText;
     [SerializeField] private Dropdown messageTarget;
@@ -47,6 +52,8 @@ public class InGameUI : MonoBehaviour
         
         // Load scene
         ScenesManager.Instance.LoadLevel(NetworkManager.Instance.GetCurrentRoom().SceneName);
+        
+        chatLayout.SetActive(false);
     }
 
     private void OnDestroy()
@@ -89,7 +96,7 @@ public class InGameUI : MonoBehaviour
             }
             else
             {
-                chatText.text = "";
+                chatLayout.SetActive(false);
             }
             
             Cursor.lockState = _isChatOpen ? CursorLockMode.None : CursorLockMode.Locked;
@@ -97,7 +104,7 @@ public class InGameUI : MonoBehaviour
 
         if (!_isChatOpen && lastMessageTime != 0f && Time.time - lastMessageTime > 2.5f)
         {
-            chatText.text = "";
+            chatLayout.SetActive(false);
         }
     }
 
@@ -146,20 +153,57 @@ public class InGameUI : MonoBehaviour
             Text = message.Text
         });
         
-        string sender = message.Type == TypeMessage.System ? "SYSTEM" : message.SenderNickname;
-        chatText.text += $"{sender} : {message.Text}\n";
+        // if(!_isChatOpen) RemoveAllMessages();
+        AddMessage(message);
+        chatLayout.SetActive(true);
 
         lastMessageTime = Time.time;
+
+        if (_isChatOpen)
+        {
+            StartCoroutine(ScrollToDown());
+        }
+    }
+
+    private IEnumerator ScrollToDown()
+    {
+        yield return new WaitForSeconds(0.3f);
+        ScrollRect scrollRect = chatLayout.GetComponentInChildren<ScrollRect>();
+        scrollRect.verticalNormalizedPosition = 0f;
+    }
+
+    private void RemoveAllMessages()
+    {
+        foreach (Transform listItemTransform in chatContainer.transform)
+        {
+            if(listItemTransform.gameObject != chatItemExample.gameObject)
+                Destroy(listItemTransform.gameObject);
+        }
+    }
+
+    private void AddMessage(MessageModel model)
+    {
+        GameObject newItem = Instantiate(
+            chatItemExample.gameObject, 
+            chatContainer.transform, 
+            true
+        );
+
+        ChatItem newListItem = newItem.GetComponent<ChatItem>();
+        newListItem.SetInfo(model);
+            
+        newItem.SetActive(true);
     }
 
     public void ShowAllChatHistory()
     {
-        chatText.text = "";
+        RemoveAllMessages();
         foreach (var msg in allMessages)
         {
-            string sender = msg.Type == TypeMessage.System ? "SYSTEM" : msg.SenderNickname;
-            chatText.text += $"{sender} : {msg.Text}\n";
+            AddMessage(msg);
         }
+        
+        chatLayout.SetActive(true);
     }
     
     public void SendMessage()
