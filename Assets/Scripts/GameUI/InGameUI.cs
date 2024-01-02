@@ -14,6 +14,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
+using Image = UnityEngine.UI.Image;
 
 public class InGameUI : MonoBehaviour
 {
@@ -30,6 +31,8 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private GameObject chatUI;
     [SerializeField] private PlayersListInRoomUI playersTableUI;
 
+    [SerializeField] private Image bloodOverlayImage;
+    
     private bool _isLeaved;
     private bool _isChatOpen;
     //private bool _isPlayersFieldOpen;
@@ -107,6 +110,16 @@ public class InGameUI : MonoBehaviour
             RemoveAllMessages();
             chatLayout.SetActive(false);
         }
+        
+        if (bloodOverlayAmount > 0f)
+        {
+            bloodOverlayAmount -= 0.06f;
+        }
+        else
+        {
+            bloodOverlayAmount = 0f;
+        }
+        SetBloodOverlay(bloodOverlayAmount);
     }
 
     private void OnRespawn(Vector3 pos, Vector3 rot)
@@ -130,12 +143,41 @@ public class InGameUI : MonoBehaviour
         statText.text += $"{model.CurrentWeapon.Ammo} / {model.CurrentWeapon.AmmoReserve}";
     }
 
+    private short prevHealth;
     public void OnLocalPlayerUpdated(UpdateLocalPlayerInfo model)
     {
         PlayerController.Instance.NetworkSyncComponent.SetIsAlive(!model.IsDead);
         
         PlayerController.Instance.PlayerWeaponComponent.UpdateByModel(model);
         UpdateStat(model);
+
+        if(prevHealth > model.Health)
+            OnDamage(prevHealth - model.Health);
+        
+        prevHealth = model.Health;
+    }
+
+    private float bloodOverlayAmount = 0f;
+    
+    private void OnDamage(int dmg)
+    {
+        bloodOverlayAmount = 1f;
+    }
+
+    private void SetBloodOverlay(float amount)
+    {
+        if (amount > 0f)
+        {
+            if (!bloodOverlayImage.enabled)
+            {
+                bloodOverlayImage.enabled = true;
+            }
+            bloodOverlayImage.material.SetColor("_TintColor", new Color(0.5f, 0.5f, 0.5f, amount));
+        }
+        else if (bloodOverlayImage.enabled)
+        {
+            bloodOverlayImage.enabled = false;
+        }
     }
 
     private void OnPlayersInRoomUpdated(List<PlayerModel> players)
