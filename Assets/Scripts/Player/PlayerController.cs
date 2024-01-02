@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Player.Components;
 
@@ -38,9 +39,7 @@ namespace Player
             GameObject o;
             MouseControlComponent = new MouseControlComponent(GetMainCamera(), (o = gameObject));
             MovementComponent = new MovementComponent(
-                o, 
-                GetMainCamera(), 
-                groundChecks.ToList()
+                o, GetCharacterController()
             );
             NetworkSyncComponent = new NetworkSyncComponent(o, GetMainCamera());
             PlayerWeaponComponent = new PlayerWeaponComponent(this);
@@ -58,6 +57,11 @@ namespace Player
             MovementComponent.Update();
             NetworkSyncComponent.Update();
             PlayerWeaponComponent.Update();
+        }
+
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            MovementComponent.OnControllerColliderHit(hit);
         }
 
         public void SetEnabled(bool isEnabled)
