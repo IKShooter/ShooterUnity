@@ -29,7 +29,7 @@ namespace Player
 
         [SerializeField] private GameObject playersParentGameObject;
         
-        private readonly float _interpolationSpeed = 5.0f;
+        private readonly float _interpolationSpeed = 8.5f;
         
         public RemotePlayersController()
         {
@@ -162,7 +162,7 @@ namespace Player
                     remotePlayer.Model.Position = updatePlayerInRoom.Position;
                     remotePlayer.Model.Ping = updatePlayerInRoom.Ping;
                     remotePlayer.IsDead = updatePlayerInRoom.IsDead;
-                        
+                    
                     remotePlayer.WeaponPoint.SetActiveWeapon(updatePlayerInRoom.CurrentWeapon);
                 }
             }
@@ -191,17 +191,17 @@ namespace Player
                     remotePlayer.GameObject.transform.rotation = Quaternion.Slerp(remotePlayer.GameObject.transform.rotation, Quaternion.Euler(0f, remotePlayer.Model.RotationY, 0f), Time.deltaTime*_interpolationSpeed);
                 }
                 
-                var rotation = remotePlayer.CameraJoin.transform.rotation;
+                var rotation = remotePlayer.CameraJoin.transform.localRotation;
                 rotation = Quaternion.Slerp(
                     rotation, 
                     Quaternion.Euler(
                         remotePlayer.Model.RotationCameraX, 
-                        rotation.y,
-                        rotation.z
+                        0f,
+                        0f
                     ),
                 Time.deltaTime*_interpolationSpeed
                 );
-                remotePlayer.CameraJoin.transform.rotation = rotation;
+                remotePlayer.CameraJoin.transform.localRotation = rotation;
 
                 // Rotate nick
                 TextMesh nickNameText = remotePlayer.GameObject.GetComponentInChildren<TextMesh>();

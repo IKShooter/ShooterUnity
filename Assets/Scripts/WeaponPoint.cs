@@ -65,7 +65,7 @@ public class WeaponPoint : MonoBehaviour
 
         Transform leftHandTarget = null;
         Transform rightHandTarget = null;
-        Transform pinPoint = null;
+        //Transform pinPoint = null;
         foreach (Transform tr in _activeWeaponObject.transform)
         {
             if(!isSecondLayer)
@@ -75,43 +75,52 @@ public class WeaponPoint : MonoBehaviour
                 leftHandTarget = tr;
             if (tr.gameObject.name == "TargetRightHand")
                 rightHandTarget = tr;
-            if (tr.gameObject.name == "PinPoint")
-                pinPoint = tr;
+            // if (tr.gameObject.name == "PinPoint")
+            //     pinPoint = tr;
         }
         
         leftHand.GetComponent<FastIKFabric>().Target = leftHandTarget;
         rightHand.GetComponent<FastIKFabric>().Target = rightHandTarget;
 
-        if (pinPoint != null)
+        // if (pinPoint != null)
+        // {
+        //     pinPoint.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
+        //
+        //     // Math new weapon position
+        //     if (pinPoint != null)
+        //     {
+        //         var position = pinPoint.position;
+        //         float aX = position.x;
+        //         float aY = position.y;
+        //         float aZ = position.z;
+        //
+        //         var transform1 = transform;
+        //         var position1 = transform1.position;
+        //         float bX = position1.x;
+        //         float bY = position1.y;
+        //         float bZ = position1.z;
+        //
+        //         float xF = (aX - bX);
+        //         float yF = (aY - bY);
+        //         float zF = (bZ - aZ);
+        //
+        //        // pinPoint.transform.localPosition = new Vector3(xF, yF, zF);
+        //
+        //         if (isSecondLayer)
+        //         {
+        //             pinPoint.transform.localPosition += pinPoint.transform.forward * 5.3f;
+        //         }
+        //     }
+        //}
+
+        // TODO: Stupid check, fix WeaponAnimIK
+        if (isSecondLayer)
         {
-            pinPoint.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
-
-            // Math new weapon position
-            if (pinPoint != null)
-            {
-                var position = pinPoint.position;
-                float aX = position.x;
-                float aY = position.y;
-                float aZ = position.z;
-
-                var transform1 = transform;
-                var position1 = transform1.position;
-                float bX = position1.x;
-                float bY = position1.y;
-                float bZ = position1.z;
-
-                float xF = (aX - bX);
-                float yF = (aY - bY);
-                float zF = (bZ - aZ);
-
-                pinPoint.transform.localPosition = new Vector3(xF, yF, zF);
-            }
+            // Add weapon anim to this weapon point
+            _weaponAnimIK = gameObject.GetComponent<WeaponAnimIK>();
+            if(_weaponAnimIK == null)
+                _weaponAnimIK = gameObject.AddComponent<WeaponAnimIK>();
         }
-
-        // Add weapon anim to this weapon point
-        _weaponAnimIK = gameObject.GetComponent<WeaponAnimIK>();
-        if(_weaponAnimIK == null)
-            _weaponAnimIK = gameObject.AddComponent<WeaponAnimIK>();
     }
 
     public GameObject GetWeaponGameObject()
