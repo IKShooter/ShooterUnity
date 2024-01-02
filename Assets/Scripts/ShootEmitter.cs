@@ -14,6 +14,7 @@ public class ShootEmitter : MonoBehaviour
 
         _audioSource = gameObject.AddComponent<AudioSource>();
         _audioSource.volume = 0.5f;
+        _audioSource.spatialBlend = 1f; // Enable 3D
         _shootClip = Resources.Load<AudioClip>("Sounds/PistolShoot");
     }
 
