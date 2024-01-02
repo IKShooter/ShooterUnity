@@ -22,11 +22,11 @@
             new Keyframe(90f, 0f)
         });
 
-        public float maxGroundAcceleration = 100;
+        public float maxGroundAcceleration = 400;
 
         public float maxGroundDecceration = 100;
 
-        public float maxAirAcceleration = 100;
+        public float maxAirAcceleration = 400;
 
         public float maxAirDecceration = 100;
 

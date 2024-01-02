@@ -439,5 +439,10 @@ namespace Player.Components
         {
             motor.OnControllerColliderHit(hit);
         }
+
+        public CharacterMotor GetMotor()
+        {
+            return motor;
+        }
     }
 }

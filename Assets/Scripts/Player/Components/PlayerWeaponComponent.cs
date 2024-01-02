@@ -130,16 +130,15 @@ namespace Player.Components
             if (isHitRemotePlayer)
                 Debug.Log($"Hitted enemy! {hit.collider.gameObject.name}");
 
-            if (_currentWeapon.Type == WeaponType.Shotgun)
+            if (isHitted && _currentWeapon.Type == WeaponType.Shotgun)
             {
-                // TODO
-                MakeShootImpulse();
+                MakeShootImpulse(hit.point);
             }
         }
 
-        private void MakeShootImpulse()
+        private void MakeShootImpulse(Vector3 pos)
         {
-            //PlayerController.Instance.MovementComponent.ApplyImpulse(Vector3.up * 4f);
+            PlayerController.Instance.MovementComponent.GetMotor().SetExplosionForce(pos, 32f);
         }
 
 
