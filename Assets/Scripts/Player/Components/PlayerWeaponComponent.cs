@@ -27,13 +27,15 @@ namespace Player.Components
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
-                // TODO: Prevent reloading, if can't (no reserv or not needed)
-                _isShoot = false;
-                _weaponPoint.DoReload(() =>
+                if (_currentWeapon.AmmoReserve > 0)
                 {
-                    ReloadWeapon();
-                    return false;
-                });
+                    _isShoot = false;
+                    _weaponPoint.DoReload(() =>
+                    {
+                        ReloadWeapon();
+                        return false;
+                    });
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.Mouse0) && (_currentWeapon.Ammo > 0 || _currentWeapon.Type == WeaponType.Melee))
