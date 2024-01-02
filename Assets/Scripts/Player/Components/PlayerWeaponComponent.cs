@@ -15,6 +15,7 @@ namespace Player.Components
         private readonly WeaponPoint _weaponPoint;
 
         private bool _isShoot;
+        private bool _isShootInProgress;
 
         public PlayerWeaponComponent(PlayerController controller)
         {
@@ -37,7 +38,7 @@ namespace Player.Components
 
             if (Input.GetKeyDown(KeyCode.Mouse0) && (_currentWeapon.Ammo > 0 || _currentWeapon.Type == WeaponType.Melee))
             {
-                if (!_weaponPoint.GetWeaponAnimIK().IsReload && !_isShoot)
+                if (!_weaponPoint.GetWeaponAnimIK().IsReload && !_isShootInProgress)
                 {
                     _isShoot = true;
                     _controller.StartCoroutine(StartShootCoroutine());
@@ -67,6 +68,8 @@ namespace Player.Components
 
         private IEnumerator StartShootCoroutine()
         {
+            _isShootInProgress = true;
+            
             while (_isShoot)
             {
                 if (_currentWeapon.Ammo <= 0 && _currentWeapon.Type != WeaponType.Melee)
@@ -90,6 +93,8 @@ namespace Player.Components
                         yield break;
                 }
             }
+
+            _isShootInProgress = false;
         }
         
         private void Shoot()
