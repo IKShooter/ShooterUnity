@@ -1,6 +1,6 @@
 ﻿public static class GameConstants
 {
-    public const string ServerAddr = "127.0.0.1";
+    public const string ServerAddr = "10.0.0.4";
     public const ushort ServerPort = 7332;
     public const string ServerKey = "Shooter";
     public const string VersionName = "test";

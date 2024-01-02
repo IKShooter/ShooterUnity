@@ -1,4 +1,6 @@
-﻿using Player.Components;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Player.Components;
 
 namespace Player
 {
@@ -8,7 +10,7 @@ namespace Player
     {
         public static PlayerController Instance;
         
-        [SerializeField] private Transform groundCheck;
+        [SerializeField] private Transform[] groundChecks;
         
         public MouseControlComponent MouseControlComponent;
         public MovementComponent MovementComponent;
@@ -35,7 +37,11 @@ namespace Player
             // Init components
             GameObject o;
             MouseControlComponent = new MouseControlComponent(GetMainCamera(), (o = gameObject));
-            MovementComponent = new MovementComponent(_characterController, o);
+            MovementComponent = new MovementComponent(
+                o, 
+                GetMainCamera(), 
+                groundChecks.ToList()
+            );
             NetworkSyncComponent = new NetworkSyncComponent(o, GetMainCamera());
             PlayerWeaponComponent = new PlayerWeaponComponent(this);
             
@@ -64,12 +70,12 @@ namespace Player
             return GetCharacterController().enabled;
         }
         
-        public bool IsGrounded()
-        {
-            int ignoreRaycastLayer = LayerMask.NameToLayer("Player");
-            int layerMask = 1 << ignoreRaycastLayer;
-            return Physics.CheckSphere(groundCheck.position, 0.2f, ~layerMask);
-        }
+        // public bool IsGrounded()
+        // {
+        // int ignoreRaycastLayer = LayerMask.NameToLayer("Player");
+        // int layerMask = 1 << ignoreRaycastLayer;
+        //     return Physics.CheckSphere(groundChecks.position, 0.2f, ~layerMask);
+        // }
 
         public Camera GetWeaponCamera()
         {

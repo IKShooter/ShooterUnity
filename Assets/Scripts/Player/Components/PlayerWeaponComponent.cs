@@ -75,6 +75,7 @@ namespace Player.Components
                 if (_currentWeapon.Ammo <= 0 && _currentWeapon.Type != WeaponType.Melee)
                 {
                     _isShoot = false;
+                    _isShootInProgress = false;
                     yield break;
                 }
                 
@@ -90,6 +91,7 @@ namespace Player.Components
                     
                     default:
                         _isShoot = false;
+                        _isShootInProgress = false;
                         yield break;
                 }
             }
@@ -135,13 +137,7 @@ namespace Player.Components
 
         private void MakeShootImpulse()
         {
-            CharacterController characterController = _controller.GetCharacterController();
-            var transform = _controller.transform;
-            Vector3 impulseDirection = -transform.forward * 3.5f + transform.up * 5.5f; // Adjust the impulse direction and magnitude as needed
-            float impulseForce = 5.0f; // Adjust the force magnitude as needed
-
-            // Apply the impulse using Move
-            characterController.Move(impulseDirection * (impulseForce * Time.deltaTime));
+            //PlayerController.Instance.MovementComponent.ApplyImpulse(Vector3.up * 4f);
         }
 
 
