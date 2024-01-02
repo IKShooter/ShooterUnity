@@ -1,12 +1,25 @@
-﻿using Events;
+﻿using System;
+using System.Diagnostics;
+using Events;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class GlobalErrorHandler : MonoBehaviour
 {
     private void Start()
     {
+        EventsManager<ServerDisconnectedEvent>.Register((peer, disconnectInfo) =>
+        {
+            ShowErrorDialog("Disconnected", "You has ben disconnected from server!", () =>
+            {
+                SceneManager.LoadScene("Scenes/Auth", LoadSceneMode.Single);
+                
+                return true;
+            });
+        });
+        
         EventsManager<ErrorEvent>.Register((errorTag, error, isCritical) =>
         {
             Debug.Log($"ERROR from {errorTag}: {error}");
@@ -14,14 +27,26 @@ public class GlobalErrorHandler : MonoBehaviour
             ShowErrorDialog(errorTag,
                 isCritical
                     ? $"Critical error! Restart game for reconnect to server.\nReason: {error.Message}"
-                    : error.Message);
+                    : error.Message, () =>
+                {
+                    if (isCritical)
+                    {
+                        // Windows only way to restart game
+                        Process.Start(Application.dataPath.Replace("_Data", ".exe")); 
+                        Application.Quit();
+                    }
+                
+                    return true;
+                });
         });
         
         DontDestroyOnLoad(this);
     }
 
-    private void ShowErrorDialog(string title, string message)
+    private void ShowErrorDialog(string title, string message, Func<bool> callback)
     {
+        Cursor.lockState = CursorLockMode.None;
+        
         GameObject dialogAsset = Resources.Load<GameObject>("Prefabs/UI/ErrorDialog");
         GameObject uiGameObject = Instantiate(dialogAsset);
 
@@ -49,6 +74,7 @@ public class GlobalErrorHandler : MonoBehaviour
 
         uiGameObject.GetComponentsInChildren<Button>()[0].onClick.AddListener(() =>
         {
+            callback.Invoke();
             Destroy(uiGameObject);
         });
 
