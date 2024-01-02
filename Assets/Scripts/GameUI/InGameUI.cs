@@ -104,6 +104,7 @@ public class InGameUI : MonoBehaviour
 
         if (!_isChatOpen && lastMessageTime != 0f && Time.time - lastMessageTime > 2.5f)
         {
+            RemoveAllMessages();
             chatLayout.SetActive(false);
         }
     }

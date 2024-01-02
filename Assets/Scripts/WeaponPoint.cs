@@ -104,7 +104,7 @@ public class WeaponPoint : MonoBehaviour
                 float yF = (aY - bY);
                 float zF = (bZ - aZ);
 
-                _activeWeaponObject.transform.localPosition = new Vector3(xF, yF, zF);
+                pinPoint.transform.localPosition = new Vector3(xF, yF, zF);
             }
         }
 
