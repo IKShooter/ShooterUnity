@@ -81,6 +81,9 @@ namespace Player
         
         private void OnPlayerShootEvent(ShootModel model)
         {
+            RemotePlayer rp = _remotePlayers.Find(pl => model.PlayerShooter.Id == pl.Model.Id);
+            rp.WeaponPoint.GetComponentInChildren<ShootEmitter>().Emit();
+            
             // Is not full missed
             if(model.PosTo != Vector3.zero)
                 Utils.SpawnHitParticle(model.PosTo);

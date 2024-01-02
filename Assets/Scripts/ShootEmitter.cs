@@ -7,8 +7,6 @@ public class ShootEmitter : MonoBehaviour
     private AudioSource _audioSource;
     private AudioClip _shootClip;
 
-    private const float LifeTime = 0.5f;
-
     private void Start()
     {
         _particleSystem = GetComponent<ParticleSystem>();
@@ -22,13 +20,6 @@ public class ShootEmitter : MonoBehaviour
     public void Emit()
     {
         _audioSource.PlayOneShot(_shootClip);
-        StartCoroutine(StartEmit());
-    }
-    
-    private IEnumerator StartEmit()
-    {
         _particleSystem.Play();
-        yield return new WaitForSeconds(LifeTime);
-        _particleSystem.Stop();
     }
 }
