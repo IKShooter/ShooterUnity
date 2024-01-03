@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Events;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -31,7 +32,24 @@ namespace Network
         {
             _instance ??= this;
         }
-    
+
+        private Queue<Vector3> _debugPoints = new Queue<Vector3>();
+
+        public int GetPacketsInBufferCount()
+        {
+            return _networkPacketsBufferizer.GetPacketsCount();
+        }
+        
+        public List<Vector3> GetDebugPoints()
+        {
+            float scale = 3f;
+            _debugPoints.Enqueue(new Vector3((_debugPoints.Count - 1) * scale, GetPacketsInBufferCount() * scale));
+            if (_debugPoints.Count >= 32)
+                _debugPoints.Dequeue();
+
+            return _debugPoints.ToList();
+        } 
+        
         private void Start()
         {
             DontDestroyOnLoad(this);

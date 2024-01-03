@@ -24,6 +24,11 @@ namespace Network
             _packetsQueue.Enqueue(new Packet(packet, HashCache<T>.Id, isHighPriority));
         }
 
+        public int GetPacketsCount()
+        {
+            return _packetsQueue.Count;
+        }
+
         public void Tick()
         {
             // It's maybe be a real problem!

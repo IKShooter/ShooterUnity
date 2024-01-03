@@ -15,6 +15,7 @@ using UnityEngine.UI;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
 using Image = UnityEngine.UI.Image;
+using Random = UnityEngine.Random;
 
 public class InGameUI : MonoBehaviour
 {
@@ -57,6 +58,8 @@ public class InGameUI : MonoBehaviour
         ScenesManager.Instance.LoadLevel(NetworkManager.Instance.GetCurrentRoom().SceneName);
         
         chatLayout.SetActive(false);
+
+        //debugNetworkPlotLine = debugNetworkPlot.AddLine("TPS", Color.red);
     }
 
     private void OnDestroy()

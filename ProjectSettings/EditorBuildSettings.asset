@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Maps/Polygon.unity
     guid: 6afa90cb17452c140a2a89dad653b256
+  - enabled: 1
+    path: Assets/Scenes/Maps/LegoTournament.unity
+    guid: 7b306ccac9b80434e8ba90b194ff89e6
   m_configObjects: {}
