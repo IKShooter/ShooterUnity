@@ -106,6 +106,9 @@ namespace Editor
             BoxCollider collider = go.GetComponent<BoxCollider>();
             if (collider != null && !collider.isTrigger)
             {
+                bool isEqualSides = go.transform.localScale.x + go.transform.localScale.y - go.transform.localScale.z ==
+                                    go.transform.localScale.y;
+                //  isEqualSides ? collider.bounds.size : go.transform.localScale
                 boxes.Add(new GeometryBox(collider.bounds.center, collider.bounds.size, go.transform.rotation.eulerAngles));
             }
 
