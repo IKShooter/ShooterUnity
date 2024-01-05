@@ -36,12 +36,6 @@ namespace Editor
         }
 
         [Serializable]
-        private class SpawnPointsList
-        {
-            public List<SpawnPoint> spawnPoints;
-        }
-
-        [Serializable]
         private class GeometryBox
         {
             public Vector3 pos;
@@ -57,34 +51,68 @@ namespace Editor
         }
 
         [Serializable]
-        private class GeometryInfo
+        private class AbsItemPoint
         {
-            public List<GeometryBox> geometryBoxes;
+            public Vector3 pos;
+            public ItemPoint.ItemType itemType;
 
-            public GeometryInfo(List<GeometryBox> geometryBoxes)
+            public AbsItemPoint(Vector3 pos, ItemPoint.ItemType type)
             {
-                this.geometryBoxes = geometryBoxes;
+                this.pos = pos;
+                this.itemType = type;
             }
         }
-        
-        [MenuItem("Advanced/DumpSpawnPointsJson")]
-        public static void DumpSpawnPointsJson()
+
+        [Serializable]
+        private class SceneInfo
         {
-            SpawnPointsList spawnPointsList = new SpawnPointsList();
-            spawnPointsList.spawnPoints = new List<SpawnPoint>();
-            
+            public List<GeometryBox> geometryBoxes;
+            public List<SpawnPoint> spawnPoints;
+            public List<AbsItemPoint> itemsPoints;
+
+        }
+        
+        [MenuItem("Advanced/ExportLevelForServer")]
+        public static void ExportLevelForServer() {
+            DumpSpawnPointsJson();
+
+            SceneInfo sceneInfo = new SceneInfo();
+            sceneInfo.spawnPoints = DumpSpawnPointsJson();
+            sceneInfo.geometryBoxes = DumpLevelGeometry();
+            sceneInfo.itemsPoints = DumpItemPointsJson();
+
+            string json = JsonUtility.ToJson(sceneInfo);
+            using(StreamWriter writetext = new StreamWriter($"./{SceneManager.GetActiveScene().name}.json"))
+            {
+                writetext.WriteLine(json);
+            }
+        }
+
+        private static List<SpawnPoint> DumpSpawnPointsJson()
+        {
+            List<SpawnPoint> spawnPoints = new List<SpawnPoint>();
             foreach (var obj in SceneManager.GetActiveScene().GetRootGameObjects())
             {
                 if(obj.name.Contains("PlayerSpawn"))
-                    spawnPointsList.spawnPoints.Add(new SpawnPoint(obj.transform.position, obj.transform.rotation.eulerAngles));
+                    spawnPoints.Add(new SpawnPoint(obj.transform.position, obj.transform.rotation.eulerAngles));
             }
-            
-            string json = JsonUtility.ToJson(spawnPointsList, true);
-            Debug.Log($"\n{json}\n");
+
+            return spawnPoints;
         }
 
-        [MenuItem("Advanced/DumpLevelGeometry")]
-        public static void DumpLevelGeometry()
+        private static List<AbsItemPoint> DumpItemPointsJson()
+        {
+            List<AbsItemPoint> spawnPoints = new List<AbsItemPoint>();
+            foreach (var obj in SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                if(obj.GetComponent<ItemPoint>() != null)
+                    spawnPoints.Add(new AbsItemPoint(obj.transform.position, obj.GetComponent<ItemPoint>().itemType));
+            }
+
+            return spawnPoints;
+        }
+
+        private static List<GeometryBox> DumpLevelGeometry()
         {
             List<GeometryBox> boxes = new List<GeometryBox>();
             
@@ -93,12 +121,13 @@ namespace Editor
                 DoGrabGeomRecursive(ref boxes, obj);
             }
             
-            string json = JsonUtility.ToJson(new GeometryInfo(boxes), true);
-            using(StreamWriter writetext = new StreamWriter("./levelGeometry.json"))
-            {
-                writetext.WriteLine(json);
-            }
-            //Debug.Log($"\n{json}\n");
+            // string json = JsonUtility.ToJson(new GeometryInfo(boxes), true);
+            // using(StreamWriter writetext = new StreamWriter("./levelGeometry.json"))
+            // {
+            //     writetext.WriteLine(json);
+            // }
+            
+            return boxes;
         }
 
         private static void DoGrabGeomRecursive(ref List<GeometryBox> boxes, GameObject go)
