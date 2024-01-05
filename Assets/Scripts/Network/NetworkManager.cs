@@ -30,10 +30,31 @@ namespace Network
 
         public NetworkManager()
         {
-            _instance ??= this;
+            if(_instance != null) {
+                Debug.Log("UNSAFE! Network manager re-initializated");
+            }
+            _instance = this;
         }
 
         private Queue<Vector3> _debugPoints = new Queue<Vector3>();
+
+        public void SetServerIp(string addr) {
+            PlayerPrefs.SetString("server.ip", addr);
+            PlayerPrefs.Save();
+        } 
+
+        public string GetServerIp() {
+            return PlayerPrefs.GetString("server.ip", GetAvaliableServerIps()[0]);
+        }
+
+        public List<string> GetAvaliableServerIps() {
+            return new List<string>() { "10.0.0.4", "10.0.0.5", "77.246.100.110", "127.0.0.1" };
+        }
+
+        public void ReConnect() {
+            TryDisconnect();
+            TryConnect();
+        }
 
         public int GetPacketsInBufferCount()
         {
@@ -52,9 +73,11 @@ namespace Network
         
         private void Start()
         {
-            DontDestroyOnLoad(this);
+            DontDestroyOnLoad(gameObject);
 
             _netManager = new NetManager(new NetworkEventsController(this));
+            _netManager.ReconnectDelay = 1;
+            _netManager.MaxConnectAttempts = 2;
             NetPacketProcessor = new NetPacketProcessor();
             _writer = new NetDataWriter();
 
@@ -182,7 +205,7 @@ namespace Network
         
             EventsManager<ServerDisconnectedEvent>.Register((peer, reason) =>
             {
-                _serverPeer = peer;
+                _serverPeer = null;
                 Debug.Log("Disconnected!");
             });
         
@@ -211,7 +234,7 @@ namespace Network
 
         private void OnApplicationQuit()
         {
-            TryDisconnected();
+            TryDisconnect();
         }
 
         public PlayerModel GetCurrentPlayer()
@@ -227,12 +250,14 @@ namespace Network
         public void TryConnect()
         {
             _netManager.Start();
-            _netManager.Connect(GameConstants.ServerAddr, GameConstants.ServerPort, GameConstants.ServerKey);
+            _netManager.Connect(GetServerIp(), GameConstants.ServerPort, GameConstants.ServerKey);
         }
 
-        public void TryDisconnected()
+        public void TryDisconnect()
         {
+            //_serverPeer?.Disconnect();
             _netManager.Stop();
+            EventsManager<ServerDisconnectedEvent>.Trigger?.Invoke(_serverPeer, new DisconnectInfo());
         }
 
         public void TryAuth(string nickName)

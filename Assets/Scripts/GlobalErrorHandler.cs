@@ -12,11 +12,11 @@ public class GlobalErrorHandler : MonoBehaviour
     {
         EventsManager<ServerDisconnectedEvent>.Register((peer, disconnectInfo) =>
         {
-            ShowErrorDialog("Disconnected", "You has ben disconnected from server!", () =>
+            if(!SceneManager.GetActiveScene().name.Contains("Auth"))
+                ShowErrorDialog("Disconnected", "You has ben disconnected from server!", () =>
             {
                 SceneManager.LoadScene("Scenes/Auth", LoadSceneMode.Single);
-                
-                return true;
+                return false;
             });
         });
         

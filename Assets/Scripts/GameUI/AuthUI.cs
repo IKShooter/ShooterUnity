@@ -14,28 +14,50 @@ namespace GameUI
         [SerializeField] private Text nicknameText;
         [SerializeField] private Button authButton;
         [SerializeField] private Button anonAuthButton;
+
+        [SerializeField] private Text stateText;
+
+        private enum State {
+            Undefined,
+            Connecting,
+            Connected,
+            Disconnected
+        }
+        
+        private void SetState(State state) {
+            stateText.text = state.ToString();
+            if(state == State.Connected)
+                stateText.text = "";
+
+            authButton.interactable = state == State.Connected;
+            anonAuthButton.interactable = state == State.Connected;
+        }
         
         private void Start()
         {
+            SetState(State.Connecting);
+
             nicknameText.text = PlayerPrefs.GetString("LastNickname");
             
-            authButton.interactable = false;
-            anonAuthButton.interactable = false;
-            
+            EventsManager<ServerDisconnectedEvent>.Register(OnServerDisconnected);
             EventsManager<ServerConnectedEvent>.Register(OnServerConnected);
             EventsManager<SuccessAuthEvent>.Register(OnSuccessAuth);
         }
 
         private void OnDestroy()
         {
+            EventsManager<ServerDisconnectedEvent>.Unregister(OnServerDisconnected);
             EventsManager<ServerConnectedEvent>.Unregister(OnServerConnected);
             EventsManager<SuccessAuthEvent>.Unregister(OnSuccessAuth);
         }
 
+        private void OnServerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
+            SetState(State.Disconnected);
+        }
+
         private void OnServerConnected(NetPeer peer)
         {
-            authButton.interactable = true;
-            anonAuthButton.interactable = true;
+            SetState(State.Connected);
         }
 
         private void OnSuccessAuth()

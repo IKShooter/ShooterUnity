@@ -86,7 +86,7 @@ public class LobbyUI : MonoBehaviour
 
     public void QuitGame()
     {
-        NetworkManager.Instance.TryDisconnected();
+        NetworkManager.Instance.TryDisconnect();
         Application.Quit();
     }
 }
