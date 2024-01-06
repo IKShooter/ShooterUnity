@@ -73,20 +73,18 @@ namespace GameUI
             NetworkManager.Instance.TryAuth(nicknameText.text);
         }
 
-        public void TryAuthAnonimous()
-        {
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var stringChars = new char[6];
+        private string GetRandomNickname() {
             var random = new Random();
 
-            for (int i = 0; i < stringChars.Length; i++)
-            {
-                stringChars[i] = chars[random.Next(chars.Length)];
-            }
+            var leftSides = new string[]{ "Белый", "Суб", "Желтый", "Демон", "Манящий", "Крутой", "Жованый" };
+            var rightSides = new string[]{ "Крот", "Блин", "Кот", "Вор", "Брат", "Арбуз" };
+            var value = random.Next(0, 7777).ToString();
+            return $"{leftSides[random.Next(0, leftSides.Length-1)]}{rightSides[random.Next(0, rightSides.Length-1)]}{value}";
+        }
 
-            var finalString = new String(stringChars);
-            
-            NetworkManager.Instance.TryAuth(finalString);
+        public void TryAuthAnonimous()
+        {
+            NetworkManager.Instance.TryAuth(GetRandomNickname());
         }
     }
 }

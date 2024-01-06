@@ -138,7 +138,7 @@ namespace Player.Components
 
         private void MakeShootImpulse(Vector3 pos)
         {
-            PlayerController.Instance.MovementComponent.GetMotor().SetExplosionForce(pos, 32f);
+            PlayerController.Instance.MovementComponent.GetMotor().SetExplosionForce(pos, 9.4f);
         }
 
 
