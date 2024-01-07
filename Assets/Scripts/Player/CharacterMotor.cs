@@ -357,6 +357,11 @@ namespace Player
 		this.explosionForce = this.explosionForce * power * this.explosionSpeed;
 	}
 
+	public void LiftUp()
+	{
+		movement.velocity = new Vector3(0, 7, 0);
+	}
+
 	public Vector3 ApplyGravityAndJumping(Vector3 velocity)
 	{
 		if (!this.inputJump || !this.canControl)

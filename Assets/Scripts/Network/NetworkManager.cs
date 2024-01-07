@@ -76,8 +76,8 @@ namespace Network
             DontDestroyOnLoad(gameObject);
 
             _netManager = new NetManager(new NetworkEventsController(this));
-            _netManager.ReconnectDelay = 1;
-            _netManager.MaxConnectAttempts = 2;
+            // _netManager.ReconnectDelay = 1_000;
+            // _netManager.MaxConnectAttempts = 2;
             NetPacketProcessor = new NetPacketProcessor();
             _writer = new NetDataWriter();
 
@@ -206,7 +206,7 @@ namespace Network
             EventsManager<ServerDisconnectedEvent>.Register((peer, reason) =>
             {
                 _serverPeer = null;
-                Debug.Log("Disconnected!");
+                Debug.Log($"Disconnected! Reason: {reason.Reason}");
             });
         
         
