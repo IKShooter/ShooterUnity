@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 8397037097968886213}
   - component: {fileID: 8745489054058074385}
   m_Layer: 0
-  m_Name: Crate_color_0100
+  m_Name: AmmoCrate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

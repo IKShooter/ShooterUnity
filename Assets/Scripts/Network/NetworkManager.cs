@@ -115,7 +115,14 @@ namespace Network
             netPp.RegisterNestedType(() => new ShootModel());
             netPp.RegisterNestedType(() => new LocalPlayerRespawnModel());
             netPp.RegisterNestedType(() => new DamageInfoModel());
+            netPp.RegisterNestedType(() => new EntityModel());
+            netPp.RegisterNestedType(() => new UpdateEntitiesModel());
         
+            NetPacketProcessor.SubscribeNetSerializable((UpdateEntitiesModel model, NetPeer peer) =>
+            {
+                EventsManager<UpdateEntitiesEvent>.Trigger?.Invoke(model.Entities);
+            });
+            
             NetPacketProcessor.SubscribeNetSerializable((ErrorResultModel model, NetPeer peer) =>
             {
                 EventsManager<ErrorEvent>.Trigger?.Invoke("Server error", new Exception($"{model.ErrorType.ToString()}"), model.IsCritical);
@@ -133,31 +140,7 @@ namespace Network
         
             NetPacketProcessor.SubscribeNetSerializable((RoomsListModel model, NetPeer peer) =>
             {
-                // BUG!?: Dublicates of rooms
-                // FIXME: Stupid fuck
-
-                List<RoomModel> filteredRooms = new List<RoomModel>();
-                foreach (var roomModel in model.roomListModel)
-                {
-                    bool isBugDublicate = false;
-                    foreach (var filteredRoom in filteredRooms)
-                    {
-                        if (filteredRoom.Name == roomModel.Name)
-                        {
-                            Debug.Log($"SKIPPED BUG DUBLICATE {roomModel.Name}");
-                            isBugDublicate = true;
-                            break;
-                        }
-                    }
-                
-                    // Skip dublicate
-                    if(isBugDublicate)
-                        continue;
-
-                    filteredRooms.Add(roomModel);
-                }
-
-                EventsManager<RoomsLoadedEvent>.Trigger?.Invoke(filteredRooms);
+                EventsManager<RoomsLoadedEvent>.Trigger?.Invoke(model.roomListModel);
             });
         
             NetPacketProcessor.SubscribeNetSerializable((JoinedRoomModel model, NetPeer peer) =>

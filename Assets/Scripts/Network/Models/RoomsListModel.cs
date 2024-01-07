@@ -6,10 +6,12 @@ namespace Server.Models
 {
     public class RoomsListModel : INetSerializable
     {
-        public List<RoomModel> roomListModel = new List<RoomModel>();
+        public List<RoomModel> roomListModel;
 
         public void Deserialize(NetDataReader reader)
         {
+            roomListModel = new List<RoomModel>();
+            
             int countRoomc = reader.GetInt();
 
             for(int i = 0; i < countRoomc; i++)

@@ -41,13 +41,12 @@ namespace Player.Components
         {
             PlayerController.Instance.SetInputLock(true);
             
-            var scale = 20f;
+            var scale = 18f;
             isInAnimation = true;
 
             _targetCamPos = _camStartPos + (_camera.transform.up * scale) + (-_camera.transform.forward * scale);
             
-            yield return new WaitForSecondsRealtime(1.5f);
-            yield return new WaitForSecondsRealtime(1.0f);
+            yield return new WaitForSecondsRealtime(2.0f);
             
             _targetCamPos = _camStartPos;
             
