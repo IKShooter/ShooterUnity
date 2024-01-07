@@ -17,6 +17,7 @@ namespace Player
         public MovementComponent MovementComponent;
         public NetworkSyncComponent NetworkSyncComponent;
         public PlayerWeaponComponent PlayerWeaponComponent;
+        public ReactionComponent ReactionComponent;
         
         private CharacterController _characterController;
         private Camera _playerCamera;
@@ -43,6 +44,7 @@ namespace Player
             );
             NetworkSyncComponent = new NetworkSyncComponent(o, GetMainCamera());
             PlayerWeaponComponent = new PlayerWeaponComponent(this);
+            ReactionComponent = new ReactionComponent(GetMainCamera(), o);
             
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -57,6 +59,7 @@ namespace Player
             MovementComponent.Update();
             NetworkSyncComponent.Update();
             PlayerWeaponComponent.Update();
+            ReactionComponent.Update();
         }
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
