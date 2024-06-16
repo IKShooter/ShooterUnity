@@ -48,7 +48,7 @@ namespace Network
         }
 
         public List<string> GetAvaliableServerIps() {
-            return new List<string>() { "10.0.0.4", "10.0.0.5", "77.246.100.110", "127.0.0.1" };
+            return new List<string>() { "10.0.0.4", "10.0.0.5", "31.129.228.103", "127.0.0.1" };
         }
 
         public void ReConnect() {
