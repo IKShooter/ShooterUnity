@@ -76,8 +76,8 @@ namespace GameUI
         private string GetRandomNickname() {
             var random = new Random();
 
-            var leftSides = new string[]{ "Белый", "Суб", "Желтый", "Демон", "Манящий", "Крутой", "Жованый" };
-            var rightSides = new string[]{ "Крот", "Блин", "Кот", "Вор", "Брат", "Арбуз" };
+            var leftSides = new string[]{ "White", "Red", "Yellow", "Free", "Real", "Crazy", "Insame" };
+            var rightSides = new string[]{ "Cat", "Pig", "Dog", "Wife", "Rock", "Coal" };
             var value = random.Next(0, 7777).ToString();
             return $"{leftSides[random.Next(0, leftSides.Length-1)]}{rightSides[random.Next(0, rightSides.Length-1)]}{value}";
         }
